@@ -10,9 +10,9 @@
 #define HP_PROTOCOL HP_PROTOCOL_1_6
 #endif
 
-//#undef DEBUG
+#undef DEBUG
 // uncomment to enable debug mode
-#define DEBUG
+//#define DEBUG
 
 // Serial console
 // uncomment and set to serial port where debug data should be sent
