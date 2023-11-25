@@ -13,10 +13,7 @@ void czdec::cmd_r_generic(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_CMD 
 	if(p->wanted_reply_size < 0x10)
 		NPRINT("0");
 	NPRINTLN(p->wanted_reply_size, HEX);
-	NPRINT("Size of R_CMD: ");
-	NPRINTLN(sizeof(R_CMD));
-	NPRINT("Value of wanted_reply_size: ");
-	NPRINTLN(p->wanted_reply_size, HEX);
+
 	NPRINT("crc: ");
 	if(p->crc < 0x10)
 		NPRINT("0");
