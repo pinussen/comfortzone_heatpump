@@ -79,7 +79,7 @@ static czdec::KNOWN_REGISTER kr_decoder[] =
 		{ {0x01, 0x02, 0x03, 0x04, 0x0B, 0x08, 0x01, 0x64, 0x01}, czcraft::KR_UNCRAFTABLE, "Status 04", czdec::cmd_r_generic, czdec::empty, czdec::reply_r_status_04, czdec::reply_w_generic},	// 0xC2 bytes
 		{ {0x01, 0x02, 0x03, 0x04, 0x0B, 0x08, 0x01, 0x7A, 0x03}, czcraft::KR_UNCRAFTABLE, "Status 07", czdec::cmd_r_generic, czdec::empty, czdec::reply_r_status_07, czdec::reply_w_generic},	// 0xC2 bytes
 		{ {0x01, 0x02, 0x03, 0x04, 0x0B, 0x08, 0x01, 0xB2, 0x00}, czcraft::KR_UNCRAFTABLE, "Status 03", czdec::cmd_r_generic, czdec::empty, czdec::reply_r_status_03, czdec::reply_w_generic},	// 0xC2 bytes
-		{ {0x01, 0x02, 0x03, 0x04, 0x0B, 0x08, 0x01, 0xC8, 0x02}, czcraft::KR_UNCRAFTABLE, "Status 06", czdec::cmd_r_generic, czdec::empty, czdec::reply_r_status_06, czdec::reply_w_generic},	// 0xC2 bytes
+		{ {0x01, 0x02, 0x03, 0x04, 0x0B, 0x08, 0x01, 0xC7, 0x02}, czcraft::KR_UNCRAFTABLE, "Status 06", czdec::cmd_r_generic, czdec::empty, czdec::reply_r_status_06, czdec::reply_w_generic},	// 0xC2 bytes //1.7??
 
 		{ {0x01, 0x02, 0x03, 0x04, 0x0B, 0x08, 0x03, 0x15, 0x0D}, czcraft::KR_UNCRAFTABLE, "Status 15", czdec::cmd_r_generic, czdec::empty, czdec::reply_r_status_15, czdec::reply_w_generic},	// 0xC2 bytes
 		{ {0x01, 0x02, 0x03, 0x04, 0x0B, 0x08, 0x03, 0x2B, 0x0F}, czcraft::KR_UNCRAFTABLE, "Status 18", czdec::cmd_r_generic, czdec::empty, czdec::reply_r_status_18, czdec::reply_w_generic},	// 0x5D bytes
