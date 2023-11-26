@@ -269,7 +269,7 @@ typedef struct __attribute__ ((packed))
 										// before the corresponding bits are cleared from pending_alarm[], is it set in acknowledged_alarm[] using
 										// an access to register 0x01, 0x02, 0x03, 0x04, 0x0B, 0x07, 0x81, 0x29, 0x00. Register value will be loaded in this array
 
-	byte unknown3d[9];
+	byte unknown3d[8];
 
 	// Note: at least 24, not sure above
 #define STATUS_02_NB_SENSORS 63
