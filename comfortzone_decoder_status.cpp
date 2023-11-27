@@ -280,7 +280,15 @@ void czdec::reply_r_status_01(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_
 
 void czdec::reply_r_status_02(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_REPLY *p)
 {
+
+#if HP_PROTOCOL != HP_PROTOCOL_1_7
 	R_REPLY_STATUS_02 *q = (R_REPLY_STATUS_02 *)p;
+#endif
+
+#if HP_PROTOCOL == HP_PROTOCOL_1_7
+	R_REPLY_STATUS_02_V170 *q = (R_REPLY_STATUS_02_V170 *)p;
+#endif
+
 	uint16_t active_alarm;
 
 	czhp->comfortzone_status.sensors_te0_outdoor_temp = get_int16(q->sensors[0]);

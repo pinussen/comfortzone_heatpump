@@ -177,7 +177,7 @@ typedef struct __attribute__ ((packed))
 	byte minute2;
 	byte second2;
 
-	byte unknown3[8];
+	byte unknown3[10];
 								// version 1.8
 								// byte 8:  | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 |
 								//           =0 ----------------------------------> always
@@ -934,5 +934,129 @@ typedef struct __attribute__ ((packed))
 	byte crc;
 } R_REPLY_STATUS_V180_C8A;
 
+// =====================================
+// == status frames (protocol version 1.7)
+// =====================================
+
+typedef struct __attribute__ ((packed))
+{
+	CZ_PACKET_HEADER cz_head;
+	
+	byte unknown[4];
+
+	byte hour1;
+	byte minute1;
+	byte second1;
+	byte day;
+	byte month;
+	byte year;
+	byte day_of_week;		// 1 = monday, 7 = sunday
+
+	byte unknown2;			// maybe daylight saving?
+
+	byte hour2;
+	byte minute2;
+	byte second2;
+
+	byte unknown3[8];
+								// version 1.8
+								// byte 8:  | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 |
+								//           =0 ----------------------------------> always
+								//               =0 ------------------------------> always
+								//                   =1 --------------------------> always
+								//                       =x ----------------------> 1 (additional power), 0 (no additional power)
+								//                           =1 ------------------> always
+								//                               =0 --------------> always
+								//                                   =x---y ------> xy= 11 (extra hot water forced), 00 (no extra hotwater forced)
+
+								// byte 9:  | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 |
+								//           =0 ----------------------------------> always
+								//               =1 ------------------------------> always
+								//                    x---y-----------------------> xy = 10 (heatpump is running), 11 (heatpump is powering down), 01 (defrost), 00 ( heatpump stopped)
+								//                           =? ------------------> 0 (compressor disallowed), 1 (compressor allowed)
+								//                               =x---y-----------> xy = 10 (hot water mode), 00 (idle mode), 01 (heating mode, default mode), 11 (heating+hot water)
+								//                                       =0 ------> always
+
+
+	byte general_status[5];
+								// version 1.6
+								// 0x88 0A 00 00 10    // heatpump stopped, no defrost, no heating, no hot water, no add
+								// 0x88 0E 00 00 10    // heatpump stopped, no defrost, no heating, no hot water, no add
+								// 0x8B 0E 00 00 10    // heatpump stopped, no defrost, no heating, no hot water, no add
+								// 0x88 08 00 00 10    // heatpump stopped, no defrost, no heating, no hot water, no add
+								// 0x88 2E 00 00 10    // heatpump running, no defrost, no heating,    hot water, no add
+								// 0x8B AE 00 00 10    // heatpump running, no defrost, no heating,    hot water, no add
+								// 0xA8 1A 00 00 14    // heatpump stopped,    defrost,    heating or hot water,     add
+								// 0xA8 2A 00 00 10    // heatpump running, no defrost,    heating, no hot water,    add
+								// 0xA8 3A 00 00 10    // heatpump running, no defrost,    heating, no hot water,    add
+								// 0x88 2A 00 00 10    // heatpump running, no defrost,    heating, no hot water, no add
+								// 0x8B 2E 00 00 10    // heatpump running, no defrost, no heating,    hot water, no add
+								// 0x88 AA 00 00 10    // heatpump running, no defrost,    heating, no hot water, no add
+								// 0x80 08 00 00 10    // heatpump stopped, no defrost, no heating, no hot water, no add
+								// 0xA0 08 00 00 10    // heatpump stopped, no defrost, no heating, no hot water, no add
+								// 0x80 2A 00 00 10    // heatpump running, no defrost,    heating, no hot water, no add
+
+								// byte 0:  | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 |
+								//           =1 ----------------------------------> always
+								//               =0 ------------------------------> always
+								//                   =x --------------------------> 1 = add energy on, 0 = add energy off
+								//                       =0 ----------------------> always
+								//                           =x ------------------> ?
+								//                               =0 --------------> always
+								//                                    x---y-------> xy = 11 (hot water mode), 00 (heating mode, default when stopped)
+	
+								// byte 1:  | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 |
+								//           =0 ----------------------------------> always
+								//               =0 ------------------------------> always
+								//                    x---y-----------------------> xy = 10 (heatpump is running), 11 (heatpump is powering down), 01 (heatpump stopped), 00 ( heatpump stopped?)
+								//                           =1 ------------------> always
+								//                               =x---y-----------> xy = 11 (hot water mode), 00 (idle mode), 01 (heating mode, default mode)
+								//                                       =0 ------> always
+
+								// byte 2:  | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 |
+								//            always 0
+
+								// byte 3:  | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 |
+								//            always 0 or rarely changing
+
+								// byte 4:  | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 |
+								//           =0 ----------------------------------> always
+								//               =0 ------------------------------> always
+								//                   =0 --------------------------> always
+								//                       =0 ----------------------> always
+								//                           =0 ------------------> always
+								//                               =x --------------> x = 1 (defrost in progress), 0 (no defrost in progress)
+								//                                   =0 ----------> always
+								//                                       =0 ------> always
+
+								// version 1.8
+								// byte 2:  | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 |
+								//           =0 ----------------------------------> always
+								//               =0 ------------------------------> always
+								//                   =0 --------------------------> always
+								//                       =1 ----------------------> always
+								//                           =x-----------y ------> 1010 (defrost in progress), 0000 (no defrost in process
+
+	byte unknown3b[3];
+
+	byte pending_alarm[2];		// bitmask of current alarms
+										// byte 0: | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 |
+										//                                  =1 -----> filter replacement alarm
+
+	byte unknown3c[6];
+
+	byte acknowledged_alarm[2];
+										// bitmask of acknowledged alarms
+										// before the corresponding bits are cleared from pending_alarm[], is it set in acknowledged_alarm[] using
+										// an access to register 0x01, 0x02, 0x03, 0x04, 0x0B, 0x07, 0x81, 0x29, 0x00. Register value will be loaded in this array
+
+	byte unknown3d[11];
+
+	// Note: at least 24, not sure above
+#define STATUS_02_NB_SENSORS 63
+	byte sensors[STATUS_02_NB_SENSORS][2];	// bunch of sensors (TEx)
+
+	byte crc;
+} R_REPLY_STATUS_02_V170;
 
 #endif

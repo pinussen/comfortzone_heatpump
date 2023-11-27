@@ -2,6 +2,7 @@
 #define _COMFORTZONE_CONFIG_H
 
 #define HP_PROTOCOL_1_6 160
+#define HP_PROTOCOL_1_7 170
 #define HP_PROTOCOL_1_8 180
 
 #ifndef HP_PROTOCOL
