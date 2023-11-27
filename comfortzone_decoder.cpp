@@ -148,7 +148,7 @@ static czdec::KNOWN_REGISTER kr_decoder[] =
 		//{ {0x01, 0x02, 0x03, 0x04, 0x0B, 0x08, 0x04, 0x4E, 0x3F}, czcraft::KR_UNCRAFTABLE, "Status 20", czdec::cmd_r_generic, czdec::empty, czdec::reply_r_status_20, czdec::reply_w_generic},	// 0x26 bytes
 		//{ {0x01, 0x02, 0x03, 0x04, 0x0B, 0x08, 0x04, 0x9C, 0x3E}, czcraft::KR_UNCRAFTABLE, "Status 19", czdec::cmd_r_generic, czdec::empty, czdec::reply_r_status_19, czdec::reply_w_generic},	// 0xC2 bytes
 
-		//{ {0x01, 0x02, 0x03, 0x04, 0x0B, 0x08, 0x05, 0x00, 0x00}, czcraft::KR_UNCRAFTABLE, "Status 08", czdec::cmd_r_generic, czdec::empty, czdec::reply_r_status_08, czdec::reply_w_generic},	// 0x50 bytes
+		{ {0x01, 0x02, 0x03, 0x04, 0x0B, 0x08, 0x05, 0x00, 0x00}, czcraft::KR_UNCRAFTABLE, "Status 08", czdec::cmd_r_generic, czdec::empty, czdec::reply_r_status_08, czdec::reply_w_generic},	// 0x50 bytes
 
 #endif
 
