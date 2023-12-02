@@ -319,7 +319,7 @@ void czdec::cmd_w_fan_speed(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, W_CM
 		NPRINTLN("normal");
 	else if(reg_v == 0x03)
 		NPRINTLN("high");
-#if HP_PROTOCOL == HP_PROTOCOL_1_8
+#if HP_PROTOCOL == HP_PROTOCOL_1_7 || HP_PROTOCOL == HP_PROTOCOL_1_8
 	else if(reg_v == 0x04)
 		NPRINTLN("on timer");
 #endif
@@ -566,7 +566,10 @@ void czdec::reply_r_extra_hot_water(comfortzone_heatpump *czhp, KNOWN_REGISTER *
 		NPRINTLN("off");
 	else
 		NPRINTLN(reg_v, HEX);
-
+	// 1.7 seems to have 2ece and 2a96?
+	// 41444452078a656fde021777010203040b084117002ece
+	// 41444452078a656fde021777010203040b088117002a96
+	
 	NPRINT("crc: ");
 	if(p->crc < 0x10)
 		NPRINT("0");
