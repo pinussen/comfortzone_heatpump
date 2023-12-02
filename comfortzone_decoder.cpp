@@ -174,6 +174,31 @@ static czdec::KNOWN_REGISTER kr_decoder[] =
 		//A   D   D   R   .   .   e   o   .   .   V   r   .   .   .   .   .   .   .   .   .     Y   1   .   .   %   .   #   .   .   .   .   .   0   0   0   0   .   G   .   .   .   "   .   .   .   .   .   .   A   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   3   .   L   .   =   "   .   .   .   @   .   .   .   .   .   .   .   .   1   .   .
 		{ {0x01, 0x02, 0x03, 0x04, 0x0B, 0x08, 0x05, 0x00, 0x00}, czcraft::KR_UNCRAFTABLE, "Status 08", czdec::cmd_r_generic, czdec::empty, czdec::reply_r_status_08, czdec::reply_w_generic},	// 0x50 bytes
 
+	// Change heating curve 6 -> 5 -> 4 -> 3 -> 6
+	// Data: 656fde02d35e414444521757010203040b0800a50205f2 6 to 5?
+    // Data: 656fde02d35e414444521757010203040b0800a50205f2 6 to 5?
+    // Data: 656fde02d35e414444521757010203040b0800a50205f2 6 to 5?
+    // Data: 656fde02d35e414444521757010203040b0800a50205f2 6 to 5?
+    // Data: 656fde02d35e414444521757010203040b0800a50205f2 6 to 5?
+    // Data: 656fde02d35e414444521757010203040b0800a50205f2 6 to 5?
+    // Data: 656fde02d35e414444521757010203040b0800a50205f2 6 to 5?
+    // Data: 656fde02d35e414444521757010203040b0800a50205f2 6 to 5?
+    // Data: 41444452078a656fde021777010203040b0800a50205c0 OK set to 5
+    // Data: 656fde02d35e414444521752010203040b0800a5020139 verify
+    // Data: 41444452078a656fde021772010203040b0800a502056a still 5?
+    // Data: 656fde02d35e414444521757010203040b0800a50204ac 5 -> 4
+    // Data: 41444452078a656fde021777010203040b0800a502049e OK set to 4
+    // Data: 656fde02d35e414444521752010203040b0800a5020139 verify
+    // Data: 41444452078a656fde021772010203040b0800a5020434 still 4
+    // Data: 656fde02d35e414444521757010203040b0800a502032f 4 -> 3
+    // Data: 41444452078a656fde021777010203040b0800a502031d OK set to 3
+    // Data: 656fde02d35e414444521752010203040b0800a5020139 verify
+    // Data: 41444452078a656fde021772010203040b0800a50203b7 still 3
+    // Data: 656fde02d35e414444521757010203040b0800a5020610 3 -> 6
+    // Data: 41444452078a656fde021777010203040b0800a5020622 OK set to 6
+    // Data: 656fde02d35e414444521752010203040b0800a5020139 verify
+    // Data: 41444452078a656fde021772010203040b0800a5020688 still 6
+
 #endif
 
 #if HP_PROTOCOL == HP_PROTOCOL_1_8
