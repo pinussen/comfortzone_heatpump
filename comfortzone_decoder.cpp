@@ -94,6 +94,10 @@ static czdec::KNOWN_REGISTER kr_decoder[] =
 		//{ {0x01, 0x02, 0x03, 0x04, 0x0B, 0x08, 0x80, 0x0E, 0x00}, czcraft::KR_UNCRAFTABLE, "Sanitary priority (set)", czdec::empty, czdec::empty, czdec::empty, czdec::reply_w_generic},	// this frame itself is not enough to set priority
 
 		//{ {0x01, 0x02, 0x03, 0x04, 0x0B, 0x08, 0x00, 0x00, 0x00}, czcraft::KR_UNCRAFTABLE, "Status 09", czdec::cmd_r_generic, czdec::empty, czdec::reply_r_status_09, czdec::reply_w_generic},	// 0xC2 bytes
+	    
+		//Data: 656fde02d35e414444521757010203040b0800fa030291
+    	//Data: 656fde02d35e414444521757010203040b0800fa0303cf
+   	 	//Data: 656fde02d35e414444521757010203040b0800fa030173
 		{ {0x01, 0x02, 0x03, 0x04, 0x0B, 0x08, 0x00, 0xFA, 0x03}, czcraft::KR_FAN_SPEED, "Fan speed", czdec::cmd_r_generic, czdec::cmd_w_fan_speed, czdec::reply_r_fan_speed, czdec::reply_w_generic},
 		//{ {0x01, 0x02, 0x03, 0x04, 0x0B, 0x08, 0x00, 0x05, 0x04}, czcraft::KR_UNCRAFTABLE, "Fan boost increase", czdec::cmd_r_generic, czdec::cmd_w_percentage, czdec::reply_r_percentage, czdec::reply_w_generic},
 		//{ {0x01, 0x02, 0x03, 0x04, 0x0B, 0x08, 0x00, 0x0E, 0x00}, czcraft::KR_UNCRAFTABLE, "Sanitary priority (get)", czdec::cmd_r_generic, czdec::empty, czdec::reply_r_sanitary_priority, czdec::empty},
@@ -168,6 +172,7 @@ static czdec::KNOWN_REGISTER kr_decoder[] =
 
 		//{ {0x01, 0x02, 0x03, 0x04, 0x0B, 0x08, 0x04, 0x4E, 0x3F}, czcraft::KR_UNCRAFTABLE, "Status 20", czdec::cmd_r_generic, czdec::empty, czdec::reply_r_status_20, czdec::reply_w_generic},	// 0x26 bytes
 		//{ {0x01, 0x02, 0x03, 0x04, 0x0B, 0x08, 0x04, 0x9C, 0x3E}, czcraft::KR_UNCRAFTABLE, "Status 19", czdec::cmd_r_generic, czdec::empty, czdec::reply_r_status_19, czdec::reply_w_generic},	// 0xC2 bytes
+		
 		// Provides additional energy, compressor energy, hot water energy, total runtime and compressor runtime (in minutes, CZ shows it in hours in the GUI)
 		//41  44  44  52  07  8a  65  6f  de  02  56  72  01  02  03  04  0b  08  05  00  00    59  31  19  07  25  11  23  00  00  00  00  00  30  30  30  30  13  47  00  00  b1  22  00  00  f9  14  00  00  41  09  00  00  00  00  00  00  00  00  00  00  00  00  00  00  33  8f  4c  00  3d  22  07  00  7f  40  0c  00  83  c6  10  00  ea  1a  31  00  a0
 		//65  68  68  82  07  138 101 111 222 02  86  114 01  02  03  04  11  08  05  00  00    89  49  25  07  37  17  35  00  00  00  00  00  48  48  48  48  19  71  00  00  177 34  00  00  249 20  00  00  65  09  00  00  00  00  00  00  00  00  00  00  00  00  00  00  51  143 76  00  61  34  07  00  127 64  12  00  131 198 16  00  234 26  49  00  160
@@ -176,11 +181,11 @@ static czdec::KNOWN_REGISTER kr_decoder[] =
     	
 		//Data: 656fde02d35e414444521857010203040b0881130000049c
     	//Data: 41444452078a656fde021777010203040b088113000434
-		{ {0x01, 0x02, 0x03, 0x04, 0x0B, 0x09, 0x81, 0x13, 0x00}, czcraft::KR_FIREPLACE_MODE_ENABLE, "Enable fireplace mode", czdec::empty, czdec::cmd_w_generic_2byte, czdec::empty, czdec::reply_w_generic},
+		{ {0x01, 0x02, 0x03, 0x04, 0x0B, 0x08, 0x81, 0x13, 0x00}, czcraft::KR_FIREPLACE_MODE_ENABLE, "Enable fireplace mode", czdec::empty, czdec::cmd_w_generic_2byte, czdec::empty, czdec::reply_w_generic},
 
 		//    Data: 656fde02d35e414444521857010203040b08411300fffb0a
 		//    Data: 41444452078a656fde021777010203040b0841130008ae
-		{ {0x01, 0x02, 0x03, 0x04, 0x0B, 0x09, 0x41, 0x13, 0x00}, czcraft::KR_FIREPLACE_MODE_DISABLE, "Disable fireplace mode", czdec::empty, czdec::cmd_w_generic_2byte, czdec::empty, czdec::reply_w_generic},
+		{ {0x01, 0x02, 0x03, 0x04, 0x0B, 0x08, 0x41, 0x13, 0x00}, czcraft::KR_FIREPLACE_MODE_DISABLE, "Disable fireplace mode", czdec::empty, czdec::cmd_w_generic_2byte, czdec::empty, czdec::reply_w_generic},
 
 		// Change heating curve 6 -> 5 -> 4 -> 3 -> 6
 		// Data: 656fde02d35e414444521757010203040b0800a50205f2 6 to 5?
