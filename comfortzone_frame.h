@@ -1059,4 +1059,37 @@ typedef struct __attribute__ ((packed))
 	byte crc;
 } R_REPLY_STATUS_02_V170;
 
+typedef struct __attribute__ ((packed))
+{
+	CZ_PACKET_HEADER cz_head;
+		
+	byte hot_water_max_runtime;						// minute
+	byte hot_water_pause_time;						// minute
+
+	byte unknown[16];
+
+	byte hot_water_compressor_min_frequency[2];		// Hz, LSB, 2bytes, * 10
+	byte hot_water_compressor_max_frequency[2];		// Hz, LSB, 2bytes, * 10
+
+	byte unknown[4];								// 0x00 = on, 0xFF = off ???
+
+	byte hot_water_extra_setting[2];				// °C, LSB, 2bytes, * 10
+	byte hot_water_extra_time[2];					// minute, LSB, 2bytes
+
+	byte unknown[3];
+	byte unknown[2];								//byte condensing_temperature[2];					// °C, LSB, 2 bytes, * 10 ???
+	byte unknown[7];
+
+	byte normal_fan_speed[2];						// %, LSB, 2 bytes, * 10
+	byte unknown[2];
+	//byte reduce_fan_speed[2];						// %, LSB, 2 bytes, * 10, signed
+	//byte fan_boost_increase[2];					// %, LSB, 2 bytes, * 10
+    byte unknown[26];
+
+	byte fan_time_to_filter_change[2];	// days, LSB, 2 bytes
+    byte unknown[26];
+
+	byte crc;
+} R_REPLY_STATUS_V170_X79;
+
 #endif

@@ -182,7 +182,14 @@ static czdec::KNOWN_REGISTER kr_decoder[] =
 
 		//{ {0x01, 0x02, 0x03, 0x04, 0x0B, 0x08, 0x04, 0x4E, 0x3F}, czcraft::KR_UNCRAFTABLE, "Status 20", czdec::cmd_r_generic, czdec::empty, czdec::reply_r_status_20, czdec::reply_w_generic},	// 0x26 bytes
 		//{ {0x01, 0x02, 0x03, 0x04, 0x0B, 0x08, 0x04, 0x9C, 0x3E}, czcraft::KR_UNCRAFTABLE, "Status 19", czdec::cmd_r_generic, czdec::empty, czdec::reply_r_status_19, czdec::reply_w_generic},	// 0xC2 bytes
-		
+
+		//status_v170_x79
+		//1f  15  7e  ff  74  ff  92  ff  88  ff  ce  ff  c4  ff  f1  ff  e7  ff  2d  01  25  02  26  02  1e  00  bb  02  aa  00  32  00  0a  0a  26  02  33  00  58  02  01  66  03  d4  fe  2c  01  00  00  2c  01  48  03  8a  02  ee  02  48  03  b6  03  e8  03  d4  fe  bc  02  00  00  32  00  46  00  d0  07  a6  0e  88  13  fa  00  34  03  26  02  bc  02  34  03  fc  03  1a  04  fa  00  4a  01  00  00  a9
+		//31  21  126 255 116 255 146 255 136 255 206 255 196 255 241 255 231 255 45  01  37  02  38  02  30  00  187 02  170 00  50  00  10  10  38  02  51  00  88  02  01  102 03  212 254 44  01  00  00  44  01  72  03  138 02  238 02  72  03  182 03  232 03  212 254 188 02  00  00  50  00  70  00  208 07  166 14  136 19  250 00  52  03  38  02  188 02  52  03  252 03  26  04  250 00  74  01  00  00  169
+		//hwmax hwpause                                                           min fre max fre                 heatin  h-time              hw done on cond. temp           fan spd         300             300     840     650     750     840     694     1000            700             50      filter change   3750    5000            820     550     700     820     1020    1050    250     330
+		//		126		116		146		136		206		196		241		231		301		549		550		30		699		170						550     51      600         870                                                                                                                             2000
+        { {0x01, 0x02, 0x03, 0x04, 0x0B, 0x08, 0x00, 0xD2, 0x03}, czcraft::KR_UNCRAFTABLE, "Status v170 x79", czdec::cmd_r_generic, czdec::empty, czdec::reply_r_status_v170_x79, czdec::reply_w_generic},	// 0x79 bytes
+
 		// Provides additional energy, compressor energy, hot water energy, total runtime and compressor runtime (in minutes, CZ shows it in hours in the GUI)
 		//41  44  44  52  07  8a  65  6f  de  02  56  72  01  02  03  04  0b  08  05  00  00    59  31  19  07  25  11  23  00  00  00  00  00  30  30  30  30  13  47  00  00  b1  22  00  00  f9  14  00  00  41  09  00  00  00  00  00  00  00  00  00  00  00  00  00  00  33  8f  4c  00  3d  22  07  00  7f  40  0c  00  83  c6  10  00  ea  1a  31  00  a0
 		//65  68  68  82  07  138 101 111 222 02  86  114 01  02  03  04  11  08  05  00  00    89  49  25  07  37  17  35  00  00  00  00  00  48  48  48  48  19  71  00  00  177 34  00  00  249 20  00  00  65  09  00  00  00  00  00  00  00  00  00  00  00  00  00  00  51  143 76  00  61  34  07  00  127 64  12  00  131 198 16  00  234 26  49  00  160

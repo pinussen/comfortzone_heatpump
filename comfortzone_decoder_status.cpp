@@ -3078,5 +3078,259 @@ void czdec::reply_r_status_v180_c8a(comfortzone_heatpump *czhp, KNOWN_REGISTER *
 #endif
 }
 
+// -----------------------------
+// Version 1.7
+// -----------------------------
 
+void czdec::reply_r_status_v170_x79(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_REPLY *p)
+{
+	R_REPLY_STATUS_V170_X79 *q = (R_REPLY_STATUS_V170_X79 *)p;
+
+	czhp->comfortzone_status.fan_time_to_filter_change = get_uint16(q->fan_time_to_filter_change);
+
+	czhp->comfortzone_status.hot_water_setting = get_uint16(q->hot_water_user_setting);
+#ifdef DEBUG
+	int reg_v;
+	float reg_v_f;
+	int i;
+
+	// ===
+	dump_unknown("unknown_s01", q->unknown, sizeof(q->unknown));
+
+	// ===
+	reg_v = q->extra_hot_water;
+
+	NPRINT("Extra hot water: ");
+	if(reg_v == 0xFF)
+		NPRINT("off");
+	else
+		NPRINT("on - ");			// 0xFF = off mais on = 0x02 ou autre chose
+		NPRINT(reg_v, HEX);
+	NPRINTLN("");
+
+	// ===
+	reg_v = get_uint16(q->hot_water_user_setting);
+
+	reg_v_f = reg_v;
+	reg_v_f /= 10.0;
+
+	NPRINT("Hot water User setting: ");
+	NPRINT(reg_v_f);
+	NPRINTLN("°C");
+
+	// ===
+	reg_v = get_uint16(q->hot_water_hysteresis);
+
+	reg_v_f = reg_v;
+	reg_v_f /= 10.0;
+
+	NPRINT("Hot water - hysteresis: ");
+	NPRINT(reg_v_f);
+	NPRINTLN("°C");
+
+	// ===
+	for(i = 0; i < STATUS_01_NB_HW_NORMAL_STEPS; i++)
+	{
+		reg_v = get_int16(q->hot_water_normal_steps[i]);
+
+		reg_v_f = reg_v;
+		reg_v_f /= 10.0;
+
+		NPRINT("Hot water - Normal step ");
+		NPRINT(i);
+		NPRINT(": ");
+		NPRINT(reg_v_f);
+		NPRINTLN("°C");
+	}
+
+	// ===
+	for(i = 0; i < STATUS_01_NB_HW_HIGH_STEPS; i++)
+	{
+		reg_v = get_int16(q->hot_water_high_steps[i]);
+
+		reg_v_f = reg_v;
+		reg_v_f /= 10.0;
+
+		NPRINT("Hot water - High step ");
+		NPRINT(i);
+		NPRINT(": ");
+		NPRINT(reg_v_f);
+		NPRINTLN("°C");
+	}
+	
+	// ===
+	for(i = 0; i < STATUS_01_NB_HW_EXTRA_STEPS; i++)
+	{
+		reg_v = get_int16(q->hot_water_extra_steps[i]);
+
+		reg_v_f = reg_v;
+		reg_v_f /= 10.0;
+
+		NPRINT("Hot water - Additional step ");
+		NPRINT(i);
+		NPRINT(": ");
+		NPRINT(reg_v_f);
+		NPRINTLN("°C");
+	}
+	
+	// ===
+	dump_unknown("unknown_s01_5a", q->unknown5a, sizeof(q->unknown5a));
+
+	// ===
+	reg_v = q->hot_water_max_runtime;
+
+	NPRINT("Hot water max runtime: ");
+	NPRINT(reg_v);
+	NPRINTLN("min");
+
+	// ===
+	reg_v = q->hot_water_pause_time;
+
+	NPRINT("Hot water pause duration: ");
+	NPRINT(reg_v);
+	NPRINTLN("min");
+	
+	// ===
+	for(i = 0; i < 8; i++)
+	{
+		reg_v = get_int16(q->unknown5b[i]);
+
+		reg_v_f = reg_v;
+
+		NPRINT("unknown_s01_5b[");
+		NPRINT(i);
+		NPRINT("]: ");
+		NPRINT(reg_v_f);
+		NPRINTLN("?");
+	}
+
+
+	// ===
+	reg_v = get_uint16(q->hot_water_compressor_min_frequency);
+
+	reg_v_f = reg_v;
+	reg_v_f /= 10.0;
+
+	NPRINT("Hot water - compressor min freq.: ");
+	NPRINT(reg_v_f);
+	NPRINTLN("Hz");
+
+	// ===
+	reg_v = get_uint16(q->hot_water_compressor_max_frequency);
+
+	reg_v_f = reg_v;
+	reg_v_f /= 10.0;
+
+	NPRINT("Hot water - compressor max freq.: ");
+	NPRINT(reg_v_f);
+	NPRINTLN("Hz");
+	
+	// ===
+	dump_unknown("unknown_s01_6", q->unknown6, sizeof(q->unknown6));
+
+	// ===
+	reg_v = get_uint16(q->hot_water_extra_setting);
+
+	reg_v_f = reg_v;
+	reg_v_f /= 10.0;
+
+	NPRINT("Hot water - extra setting: ");
+	NPRINT(reg_v_f);
+	NPRINTLN("°C");
+
+	// ===
+	reg_v = get_uint16(q->hot_water_extra_time);
+
+	NPRINT("Hot water - extra time: ");
+	NPRINT(reg_v);
+	NPRINTLN("min");
+
+	// ===
+	dump_unknown("unknown_s01_7", q->unknown7, sizeof(q->unknown7));
+
+	// ===
+	reg_v = get_uint16(q->normal_fan_speed);
+
+	reg_v_f = reg_v;
+	reg_v_f /= 10.0;
+
+	NPRINT("Normal fan speed: ");
+	NPRINT(reg_v_f);
+	NPRINTLN("%");
+
+	// ===
+	reg_v = get_int16(q->reduce_fan_speed);
+
+	reg_v_f = reg_v;
+	reg_v_f /= 10.0;
+
+	NPRINT("Reduce fan speed: ");
+	NPRINT(reg_v_f);
+	NPRINTLN("%");
+
+	// ===
+	reg_v = get_int16(q->fan_boost_increase);
+
+	reg_v_f = reg_v;
+	reg_v_f /= 10.0;
+
+	NPRINT("Fan boost increase: ");
+	NPRINT(reg_v_f);
+	NPRINTLN("%");
+
+	// ===
+	dump_unknown("unknown_s01_8", q->unknown8, sizeof(q->unknown8));
+
+	// ===
+	reg_v = get_int16(q->supply_fan_t12_adjust);
+
+	reg_v_f = reg_v;
+	reg_v_f /= 10.0;
+
+	NPRINT("Supply fan T12 adjust: ");
+	NPRINT(reg_v_f);
+	NPRINTLN("%");
+
+	// ===
+	dump_unknown("unknown_s01_8a", q->unknown8a, sizeof(q->unknown8a));
+
+	// ===
+	reg_v = get_uint16(q->fan_time_to_filter_change);
+
+	NPRINT("Fan - Time to filter change: ");
+	NPRINT(reg_v);
+	NPRINTLN("d");
+
+	// ===
+	dump_unknown("unknown_s01_9", q->unknown9, sizeof(q->unknown9));
+
+	// ===
+	reg_v = get_uint16(q->heating_compressor_min_frequency);
+
+	reg_v_f = reg_v;
+	reg_v_f /= 10.0;
+
+	NPRINT("Heating compressor min freq.: ");
+	NPRINT(reg_v_f);
+	NPRINTLN("Hz");
+
+	// ===
+	reg_v = get_uint16(q->heating_compressor_max_frequency);
+
+	reg_v_f = reg_v;
+	reg_v_f /= 10.0;
+
+	NPRINT("Heating compressor max freq.: ");
+	NPRINT(reg_v_f);
+	NPRINTLN("Hz");
+
+	// ===
+	dump_unknown("unknown_s01_9a", q->unknown9a, sizeof(q->unknown9a));
+
+	NPRINT("crc: ");
+	if(q->crc < 0x10)
+		NPRINT("0");
+	NPRINTLN(q->crc, HEX);
+#endif
+}
 
