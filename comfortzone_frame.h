@@ -1078,7 +1078,7 @@ typedef struct __attribute__ ((packed))
 
 	byte unknown3[3];
 	byte unknown4[2];								//byte condensing_temperature[2];					// °C, LSB, 2 bytes, * 10 ???
-	byte unknown5[7];
+	byte unknown5[6];
 
 	byte normal_fan_speed[2];						// %, LSB, 2 bytes, * 10
 	byte unknown6[2];
