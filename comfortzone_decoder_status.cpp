@@ -32,7 +32,7 @@ void czdec::reply_r_status_01(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_
 
 	czhp->comfortzone_status.fan_time_to_filter_change = get_uint16(q->fan_time_to_filter_change);
 
-	czhp->comfortzone_status.hot_water_setting = get_uint16(q->hot_water_user_setting);
+	czhp->comfortzone_status.hot_water_setting = get_uint16(q->hot_water_extra_setting);
 #ifdef DEBUG
 	int reg_v;
 	float reg_v_f;
