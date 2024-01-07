@@ -204,6 +204,13 @@ static czdec::KNOWN_REGISTER kr_decoder[] =
 		//    Data: 41444452078a656fde021777010203040b0841130008ae
 		{ {0x01, 0x02, 0x03, 0x04, 0x0B, 0x08, 0x41, 0x13, 0x00}, czcraft::KR_FIREPLACE_MODE_DISABLE, "Disable fireplace mode", czdec::empty, czdec::cmd_w_generic_2byte, czdec::empty, czdec::reply_w_generic},
 
+		// room temp
+		//41 44 44 52 07 8a 65 6f de 02 2d 72 01 02 03 04 0b 08 00 9d 02 02 06 00 00 ff 00 00 ff 06 d1 00 14 00 32 00 ce ff 00 00 07 00 00 00 fe
+		//41  44  44  52  07  8a  65  6f  de  02  2d  72  01  02  03  04  0b  08    00  9d  02    02  06  00  00  ff  00  00  ff  06  d1  00  14  00  32  00  ce  ff  00  00  07  00  00  00  fe
+		//65  68  68  82  07  138 101 111 222 02  45  114 01  02  03  04  11  08    00  157 02    02  06  00  00  255 00  00  255 06  209 00  20  00  50  00  206 255 00  00  07  00  00  00  254
+		//A   D   D   R   .   .   e   o   .   .   -   r   .   .   .   .   .   .     .   .   .     .   .   .   .   .   .   .   .   .   .   .   .   .   2   .   .   .   .   .   .   .   .   .   .
+		{ {0x01, 0x02, 0x03, 0x04, 0x0B, 0x08, 0x00, 0x9D, 0x02}, czcraft::KR_UNCRAFTABLE, "Status 2D", czdec::cmd_r_generic, czdec::empty, czdec::reply_r_status_v170_status_2d, czdec::reply_w_generic},	// 0x45 bytes
+
 		// Change heating curve 6 -> 5 -> 4 -> 3 -> 6
 		// Data: 656fde02d35e414444521757010203040b0800a50205f2 6 to 5?
     	// Data: 656fde02d35e414444521757010203040b0800a50205f2 6 to 5?

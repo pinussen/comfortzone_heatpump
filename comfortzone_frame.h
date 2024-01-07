@@ -683,7 +683,7 @@ typedef struct __attribute__ ((packed))
 	byte crc;
 } R_REPLY_STATUS_V180_STATUS_x58;
 
-typedef struct __attribute__ ((packed))
+typedef struct __attribute__ ((packed)) 
 {
 	CZ_PACKET_HEADER cz_head;
 
@@ -1091,5 +1091,19 @@ typedef struct __attribute__ ((packed))
 
 	byte crc;
 } R_REPLY_STATUS_V170_X79;
+
+typedef struct __attribute__ ((packed)) // 00 9d 02  02 06 00 00 ff 00 00 ff 06 d1 00 14 00 32 00 ce ff 00 00 07 00 00 00 fe
+{
+	CZ_PACKET_HEADER cz_head;
+
+	byte unknown[8];			// °C, LSB, 2 bytes, * 10
+    byte unknown2[1];			// Heating curve
+
+	byte heating_calculated_setting[2];	// °C, LSB, 2 bytes, * 10
+
+    byte unknown[12];
+
+	byte crc;
+} R_REPLY_STATUS_V170_STATUS_2D;
 
 #endif

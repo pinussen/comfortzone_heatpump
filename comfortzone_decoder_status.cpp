@@ -3334,3 +3334,59 @@ void czdec::reply_r_status_v170_x79(comfortzone_heatpump *czhp, KNOWN_REGISTER *
 #endif
 }
 
+void czdec::reply_r_status_v170_status_2d(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_REPLY *p) 
+{
+	R_REPLY_STATUS_V170_STATUS_2D *q = (R_REPLY_STATUS_V170_STATUS_2D *)p;
+
+	czhp->comfortzone_status.room_heating_setting = get_uint16(q->heating_calculated_setting);
+	
+#ifdef DEBUG
+	int reg_v;
+	float reg_v_f;
+	int i;
+
+	dump_unknown("RAW R_REPLY_STATUS_V170_STATUS_2D", (byte *)q, sizeof(*q));
+	NPRINTLN("");
+
+	// ===
+	reg_v = get_uint16(q->calculated_flow_set);
+
+	reg_v_f = reg_v;
+	reg_v_f /= 10.0;
+
+	NPRINT("Calculated flow set: ");
+	NPRINT(reg_v_f);
+	NPRINTLN("°C");
+
+	for(i = 0; i < STATUS_V180_x40_NB_TEMP; i++)
+	{
+		reg_v = get_int16(q->temp[i]);
+
+		reg_v_f = reg_v;
+		reg_v_f /= 10.0;
+
+		NPRINT("x40 ?Temp #");
+		NPRINT(i);
+		NPRINT(": ");
+		NPRINT(reg_v_f);
+		NPRINT("°C");
+		NPRINT(" ");
+		dump_unknown("", q->temp[i], 2);
+	}
+
+	// ===
+	reg_v = get_uint16(q->heating_calculated_setting);
+
+	reg_v_f = reg_v;
+	reg_v_f /= 10.0;
+
+	NPRINT("Heating - Calculated setting: ");
+	NPRINT(reg_v_f);
+	NPRINTLN("°C");
+
+	NPRINT("crc: ");
+	if(q->crc < 0x10)
+		NPRINT("0");
+	NPRINTLN(q->crc, HEX);
+#endif
+}
