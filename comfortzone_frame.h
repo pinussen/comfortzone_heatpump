@@ -1101,7 +1101,7 @@ typedef struct __attribute__ ((packed)) // 00 9d 02  02 06 00 00 ff 00 00 ff 06 
 
 	byte heating_calculated_setting[2];	// °C, LSB, 2 bytes, * 10
 
-    byte unknown[12];
+    byte unknown3[12];
 
 	byte crc;
 } R_REPLY_STATUS_V170_STATUS_2D;
