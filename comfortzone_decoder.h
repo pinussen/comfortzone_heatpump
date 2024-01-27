@@ -98,6 +98,7 @@ class czdec
 	// protocol version 1.70
 	static void reply_r_status_v170_x79(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_REPLY *p);
 	static void reply_r_status_v170_status_2d(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_REPLY *p);
+	static void reply_r_status_06_v170(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_REPLY *p);
 
 	// protocol version 1.80
 	static void reply_r_status_v180_x58(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_REPLY *p);

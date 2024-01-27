@@ -3390,3 +3390,265 @@ void czdec::reply_r_status_v170_status_2d(comfortzone_heatpump *czhp, KNOWN_REGI
 	NPRINTLN(q->crc, HEX);
 #endif
 }
+
+void czdec::reply_r_status_06_v170(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_REPLY *p)
+{
+	R_REPLY_STATUS_06_V170 *q = (R_REPLY_STATUS_06_V170 *)p;
+
+	czhp->comfortzone_status.heatpump_current_compressor_frequency = get_uint16(q->heatpump_current_compressor_frequency);
+	czhp->comfortzone_status.heatpump_current_compressor_power = get_uint16(q->heatpump_current_compressor_power);
+	czhp->comfortzone_status.heatpump_current_add_power = get_uint16(q->heatpump_current_add_power);
+	czhp->comfortzone_status.heatpump_current_total_power = get_uint16(q->heatpump_current_total_power1);
+	czhp->comfortzone_status.heatpump_current_compressor_input_power = get_uint16(q->heatpump_compressor_input_power);
+
+#if HP_PROTOCOL == HP_PROTOCOL_1_8
+	czhp->comfortzone_status.additional_power_enabled = (czhp->comfortzone_status.heatpump_current_add_power > 0);
+#endif	
+
+#ifdef DEBUG
+	int reg_v;
+	float reg_v_f;
+
+	// ===
+	reg_v = get_uint16(q->evaporator_pressure);
+
+	reg_v_f = reg_v;
+	reg_v_f /= 10.0;
+
+	NPRINT("Evaporator pressure: ");
+	NPRINT(reg_v_f);
+	NPRINTLN("bar");
+
+	// ===
+	reg_v = get_uint16(q->pressure_ratio);
+
+	reg_v_f = reg_v;
+	reg_v_f /= 10.0;
+
+	NPRINT("Pressure ratio: ");
+	NPRINT(reg_v_f);
+	NPRINTLN("");
+
+	// ===
+	dump_unknown("unknown_s06_0a", q->unknown0a, sizeof(q->unknown0a));
+
+	// ===
+	reg_v = get_uint16(q->heatpump_compressor_max_frequency1);
+
+	reg_v_f = reg_v;
+	reg_v_f /= 10.0;
+
+	// not real max as it changes autonomously
+	NPRINT("Heatpump - Compressor max frequency (1) (erroneous): ");
+	NPRINT(reg_v_f);
+	NPRINTLN("Hz");
+
+	// ===
+	reg_v = get_uint16(q->hot_water_active_max_frequency);
+
+	reg_v_f = reg_v;
+	reg_v_f /= 10.0;
+
+	// not real max as it changes autonomously
+	NPRINT("Hot water - Compressor active max frequency: ");
+	NPRINT(reg_v_f);
+	NPRINTLN("Hz");
+
+	// ===
+	// During defrost, forced to 0Hz else set to heating compressor max frequency
+	reg_v = get_uint16(q->heatpump_active_max_frequency1);
+
+	reg_v_f = reg_v;
+	reg_v_f /= 10.0;
+
+	NPRINT("Heatpump - Compressor active max frequency (during defrost, set to 0Hz else real compressor max frequency) (1): ");
+	NPRINT(reg_v_f);
+	NPRINTLN("Hz");
+
+	// ===
+	dump_unknown("unknown_s06_0c", q->unknown0c, sizeof(q->unknown0c));
+
+	// ===
+	reg_v = get_uint16(q->heatpump_active_max_frequency2);
+
+	reg_v_f = reg_v;
+	reg_v_f /= 10.0;
+
+	NPRINT("Heatpump - Compressor active max frequency (during defrost, set to 0Hz else real compressor max frequency) (2): ");
+	NPRINT(reg_v_f);
+	NPRINTLN("Hz");
+
+	// ===
+	reg_v = get_uint16(q->heatpump_active_max_frequency3);
+
+	reg_v_f = reg_v;
+	reg_v_f /= 10.0;
+
+	NPRINT("Heatpump - Compressor active max frequency (during defrost, set to 0Hz else real compressor max frequency) (3): ");
+	NPRINT(reg_v_f);
+	NPRINTLN("Hz");
+
+	// ===
+	reg_v = get_uint16(q->heatpump_current_compressor_frequency);
+
+	reg_v_f = reg_v;
+	reg_v_f /= 10.0;
+
+	NPRINT("Heatpump - current compressor frequency: ");
+	NPRINT(reg_v_f);
+	NPRINTLN("Hz");
+
+	// ===
+	reg_v = get_uint16(q->chauffage_compressor_max_frequency3);
+
+	reg_v_f = reg_v;
+	reg_v_f /= 10.0;
+
+	NPRINT("Chauffage - Compressor max frequency (3): ");
+	NPRINT(reg_v_f);
+	NPRINTLN("Hz");
+
+	// ===
+	dump_unknown("unknown_s06_0d", q->unknown0d, sizeof(q->unknown0d));
+
+	// ===
+	reg_v = get_uint16(q->heating_compressor_min_frequency);
+
+	reg_v_f = reg_v;
+	reg_v_f /= 10.0;
+
+	NPRINT("Heating - Compressor min frequency: ");
+	NPRINT(reg_v_f);
+	NPRINTLN("Hz");
+
+	// ===
+	reg_v = get_uint16(q->heating_compressor_max_frequency);
+
+	reg_v_f = reg_v;
+	reg_v_f /= 10.0;
+
+	NPRINT("Heating - Compressor max frequency: ");
+	NPRINT(reg_v_f);
+	NPRINTLN("Hz");
+
+	// ===
+	dump_unknown("unknown_s06_0", q->unknown0, sizeof(q->unknown0));
+
+	// ===
+	reg_v = get_uint16(q->heatpump_current_compressor_power);
+
+	NPRINT("Heatpump - current compressor power: ");
+	NPRINT(reg_v);
+	NPRINTLN("W");
+
+	// ===
+	reg_v = get_uint16(q->heatpump_current_add_power);
+
+	NPRINT("Heatpump - current add power: ");
+	NPRINT(reg_v);
+	NPRINTLN("W");
+
+	// ===
+	reg_v = get_uint16(q->heatpump_current_total_power1);
+
+	NPRINT("Heatpump - current total power 1: ");
+	NPRINT(reg_v);
+	NPRINTLN("W");
+
+	// ===
+	reg_v = get_uint16(q->heatpump_current_total_power2);
+
+	NPRINT("Heatpump - current total power 2: ");
+	NPRINT(reg_v);
+	NPRINTLN("W");
+
+	// ===
+	reg_v = get_uint16(q->heatpump_compressor_input_power);
+
+	NPRINT("Heatpump - Compressor input power: ");
+	NPRINT(reg_v);
+	NPRINTLN("W");
+
+	// ===
+	dump_unknown("unknown_s06_1a", q->unknown1a, sizeof(q->unknown1a));
+
+	// ===
+	reg_v = get_uint16(q->unknown_count_down);
+
+	NPRINT("Heatpump - remaining min runtime (?): ");
+	NPRINT(reg_v);
+	NPRINTLN("seconds");
+
+	// ===
+	dump_unknown("unknown_s06_1b", q->unknown1b, sizeof(q->unknown1b));
+
+	// ===
+	reg_v = get_uint16(q->heatpump_defrost_delay);
+
+	NPRINT("Heatpump - remaining time to next defrost (=remaining max runtime): ");
+	NPRINT(reg_v);
+	NPRINTLN("seconds");
+
+	// ===
+	dump_unknown("unknown_s06_2", q->unknown2, sizeof(q->unknown2));
+
+	// ===
+	reg_v = get_uint16(q->expansion_valve_calculated_setting);
+	reg_v_f = reg_v / 10;
+
+	NPRINT("Expansion valve - Calculated setting: ");
+	NPRINT(reg_v_f);
+	NPRINTLN("K");
+
+	// ===
+	reg_v = get_int16(q->vanne_expansion_xxx);
+	reg_v_f = reg_v / 10;
+
+	NPRINT("Vanne expansion - xxx?: ");
+	NPRINT(reg_v_f);
+	NPRINTLN("K");
+
+	// ===
+	reg_v = get_int16(q->expansion_valve_temperature_difference1);
+	reg_v_f = reg_v / 10;
+
+	NPRINT("Expansion valve - Temperature difference 1: ");
+	NPRINT(reg_v_f);
+	NPRINTLN("K");
+
+	// ===
+	reg_v = get_int16(q->expansion_valve_temperature_difference2);
+	reg_v_f = reg_v / 10;
+
+	NPRINT("Expansion valve - Temperature difference 2: ");
+	NPRINT(reg_v_f);
+	NPRINTLN("K");
+
+	// ===
+	dump_unknown("unknown_s06_2a", q->unknown2a, sizeof(q->unknown2a));
+
+	// ===
+	reg_v = get_uint16(q->expansion_valve_valve_position1);
+	reg_v_f = reg_v / 10;
+
+	NPRINT("Expansion valve - Valve position 1: ");
+	NPRINT(reg_v_f);
+	NPRINTLN("%");
+
+	// ===
+	reg_v = get_uint16(q->expansion_valve_valve_position1);
+	reg_v_f = reg_v / 10;
+
+	NPRINT("Expansion valve - Valve position 2: ");
+	NPRINT(reg_v_f);
+	NPRINTLN("%");
+
+	// ===
+	dump_unknown("unknown_s06_2a", q->unknown2a, sizeof(q->unknown2a));
+
+	NPRINT("crc: ");
+	if(q->crc < 0x10)
+		NPRINT("0");
+	NPRINTLN(q->crc, HEX);
+#endif
+}

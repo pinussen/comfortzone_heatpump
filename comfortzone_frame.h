@@ -1106,4 +1106,76 @@ typedef struct __attribute__ ((packed)) // 00 9d 02  02 06 00 00 ff 00 00 ff 06 
 	byte crc;
 } R_REPLY_STATUS_V170_STATUS_2D;
 
+typedef struct __attribute__ ((packed))
+{
+	CZ_PACKET_HEADER cz_head;
+	
+	byte unknown0alfa[4]; //00  00  b6  03 
+	byte condensing_temperature[2];					// °C, LSB, 2 bytes, * 10
+	byte condensing_pressure[2];						// bar, LSB, 2 bytes, * 10
+	byte evaporator_pressure[2];				// bar, LSB, 2 bytes, * 10
+	byte pressure_ratio[2];				// LSB, 2 bytes, * 10
+	byte unknown0a[2];		// 2bytes, LSB, either a pressure or a temperature. Goes down when PAC is off but increase when PAC is started
+	byte heatpump_current_compressor_frequency[2];	// Hz, LSB, 2bytes, * 10.
+	byte unknown0b[4];
+	byte heatpump_active_max_frequency2[2];		// Hz, LSB, 2bytes, * 10. During defrost, forced to 0Hz else set to heating compressor max frequency
+	byte heatpump_active_max_frequency3[2];		// Hz, LSB, 2bytes, * 10. During defrost, forced to 0Hz else set to heating compressor max frequency
+	byte heatpump_current_compressor_frequency[2];	// Hz, LSB, 2bytes, * 10.
+	byte chauffage_compressor_max_frequency3[2];
+	byte unknown0c[48];
+	byte heatpump_current_compressor_power[2];		// W, LSB, 2 bytes
+	byte unknown0d[2];
+	byte heatpump_current_add_power[2];			// W, LSB, 2 bytes
+	byte heatpump_current_total_power1[2];		// W, LSB, 2 bytes
+	byte unknown0e[2];
+	byte heatpump_current_total_power2[2];		// W, LSB, 2 bytes
+	byte unknown0f[2];
+	byte heatpump_compressor_input_power[2];					// W, LSB, 2 bytes
+	byte unknown0f[84];
+
+	//byte heatpump_compressor_max_frequency1[2];
+
+	//byte hot_water_active_max_frequency[2];	// Hz, LSB, 2bytes, * 10. forced to 0hz when hot water production is off (may be target frequency)
+
+	//byte heatpump_active_max_frequency1[2];		// Hz, LSB, 2bytes, * 10. During defrost, forced to 0Hz else set to heating compressor max frequency
+
+	//byte unknown0c[10];
+
+	//byte heatpump_active_max_frequency2[2];		// Hz, LSB, 2bytes, * 10. During defrost, forced to 0Hz else set to heating compressor max frequency
+	//byte heatpump_active_max_frequency3[2];		// Hz, LSB, 2bytes, * 10. During defrost, forced to 0Hz else set to heating compressor max frequency
+	//byte heatpump_current_compressor_frequency[2];	// Hz, LSB, 2bytes, * 10.
+	//byte chauffage_compressor_max_frequency3[2];
+
+	//byte unknown0d[2];
+
+	//byte heating_compressor_min_frequency[2];		// Hz, LSB, 2 bytes, * 10. Compressor min frequency when running in room heating mode
+	//byte heating_compressor_max_frequency[2];		// Hz, LSB, 2 bytes, * 10. Compressor max frequency when running in room heating mode
+	
+	//byte unknown0[30];
+
+	//byte unknown1a[4];
+
+	//byte unknown_count_down[2];				// = 00 00 when heatpump is stopped else countdown from approximately 0x0383
+
+	//byte unknown1b[6];
+
+	//byte heatpump_defrost_delay[2];	// minute, 2 bytes, LSB, *10 (erroneous)
+
+	//byte unknown2[12];
+
+	//byte expansion_valve_calculated_setting[2];	// K, LSB, 2 bytes, * 10
+	//byte vanne_expansion_xxx[2];						// negative number, expansion_valve_calculated_setting + xxx = temperature difference
+	//byte expansion_valve_temperature_difference1[2];		// K, LSB, 2 bytes, * 10
+	//byte expansion_valve_temperature_difference2[2];		// K, LSB, 2 bytes, * 10
+
+	//byte unknown2a[30];
+
+	//byte expansion_valve_valve_position1[2];		// %, LSB, 2 bytes, * 10
+	//byte expansion_valve_valve_position2[2];		// %, LSB, 2 bytes, * 10
+
+	//byte unknown2b[34];
+
+	byte crc;
+} R_REPLY_STATUS_06_V170;
+
 #endif

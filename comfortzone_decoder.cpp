@@ -154,7 +154,7 @@ static czdec::KNOWN_REGISTER kr_decoder[] =
 		//{ {0x01, 0x02, 0x03, 0x04, 0x0B, 0x08, 0x01, 0xB2, 0x00}, czcraft::KR_UNCRAFTABLE, "Status 03", czdec::cmd_r_generic, czdec::empty, czdec::reply_r_status_03, czdec::reply_w_generic},	// 0xC2 bytes
 
 		//41444452078a656fde02c672010203040b0801c70200008403cc0119014e002400db002d0100002d0138ff97ffb8fff8fd00002d012d012d012d0100000f013403740888133601000000000000000000005e01000000000000000000005c2b00004f09000000004f0900004809000
-		//{ {0x01, 0x02, 0x03, 0x04, 0x0B, 0x08, 0x01, 0xC7, 0x02}, czcraft::KR_UNCRAFTABLE, "Status 06", czdec::cmd_r_generic, czdec::empty, czdec::reply_r_status_06, czdec::reply_w_generic},	// 0xC2 bytes
+		{ {0x01, 0x02, 0x03, 0x04, 0x0B, 0x08, 0x01, 0xC7, 0x02}, czcraft::KR_UNCRAFTABLE, "Status 06", czdec::cmd_r_generic, czdec::empty, czdec::reply_r_status_06_v170, czdec::reply_w_generic},	// 0xC2 bytes
 
 		// Status 15, just a bunch of timestamps?
 		//41  44  44  52  07  8a  65  6f  de  02  c8  72  01  02  03  04  0b  08  03  15  0d  17  0d  0b  17  14  36  32  00  00  00  00  00  00  00  00  0d  0b  17  16  1c  04  00  00  00  00  00  00  00  00  12  0b  17  11  2a  1b  00  00  00  00  00  00  00  00  13  0b  17  0b  2e  2d  00  00  00  00  00  00  00  00  13  0b  17  0d  0f  2c  00  00  00  00  00  00  00  00  13  0b  17  0d  26  1f  00  00  00  00  00  00  00  00  13  0b  17  0d  27  28  00  00  00  00  00  00  00  00  13  0b  17  0d  33  2f  00  00  00  00  00  00  00  00  13  0b  17  0d  35  12  00  00  00  00  00  00  00  00  13  0b  17  0d  36  0e  00  00  00  00  00  00  00  00  13  0b  17  0d  37  27  00  00  00  00  00  00  00  00  13  0b  17  0d  39  03  00  00  00  00  00  00  00  00  13  0b  17  16  27  26  00  00  00  c8
