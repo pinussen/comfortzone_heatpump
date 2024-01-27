@@ -1120,7 +1120,7 @@ typedef struct __attribute__ ((packed))
 	byte unknown0b[4];
 	byte heatpump_active_max_frequency2[2];		// Hz, LSB, 2bytes, * 10. During defrost, forced to 0Hz else set to heating compressor max frequency
 	byte heatpump_active_max_frequency3[2];		// Hz, LSB, 2bytes, * 10. During defrost, forced to 0Hz else set to heating compressor max frequency
-	byte heatpump_current_compressor_frequency[2];	// Hz, LSB, 2bytes, * 10.
+	byte unknown0da[2];
 	byte chauffage_compressor_max_frequency3[2];
 	byte unknown0c[48];
 	byte heatpump_current_compressor_power[2];		// W, LSB, 2 bytes
@@ -1131,7 +1131,7 @@ typedef struct __attribute__ ((packed))
 	byte heatpump_current_total_power2[2];		// W, LSB, 2 bytes
 	byte unknown0f[2];
 	byte heatpump_compressor_input_power[2];					// W, LSB, 2 bytes
-	byte unknown0f[84];
+	byte unknown0g[84];
 
 	//byte heatpump_compressor_max_frequency1[2];
 
