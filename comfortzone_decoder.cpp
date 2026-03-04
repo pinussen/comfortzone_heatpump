@@ -99,6 +99,10 @@ static czdec::KNOWN_REGISTER kr_decoder[] =
     	//Data: 656fde02d35e414444521757010203040b0800fa0303cf
    	 	//Data: 656fde02d35e414444521757010203040b0800fa030173
 		{ {0x01, 0x02, 0x03, 0x04, 0x0B, 0x08, 0x00, 0xFA, 0x03}, czcraft::KR_FAN_SPEED, "Fan speed", czdec::cmd_r_generic, czdec::cmd_w_fan_speed, czdec::reply_r_fan_speed, czdec::reply_w_generic},
+		// Extra short/unknown registers observed in data dumps — log raw payload for analysis
+		{ {0x01, 0x02, 0x03, 0x04, 0x0B, 0x08, 0x00, 0x9E, 0x04}, czcraft::KR_UNCRAFTABLE, "Status (00 9E 04)", czdec::cmd_r_generic, czdec::empty, czdec::reply_r_log_raw, czdec::reply_w_generic},
+		{ {0x01, 0x02, 0x03, 0x04, 0x0B, 0x08, 0x01, 0x45, 0x01}, czcraft::KR_UNCRAFTABLE, "Event (01 45 01)", czdec::cmd_r_generic, czdec::empty, czdec::reply_r_log_raw, czdec::reply_w_generic},
+		{ {0x01, 0x02, 0x03, 0x04, 0x0B, 0x08, 0x05, 0x2C, 0x00}, czcraft::KR_UNCRAFTABLE, "Status (05 2C 00)", czdec::cmd_r_generic, czdec::empty, czdec::reply_r_log_raw, czdec::reply_w_generic},
 		//{ {0x01, 0x02, 0x03, 0x04, 0x0B, 0x08, 0x00, 0x05, 0x04}, czcraft::KR_UNCRAFTABLE, "Fan boost increase", czdec::cmd_r_generic, czdec::cmd_w_percentage, czdec::reply_r_percentage, czdec::reply_w_generic},
 		//{ {0x01, 0x02, 0x03, 0x04, 0x0B, 0x08, 0x00, 0x0E, 0x00}, czcraft::KR_UNCRAFTABLE, "Sanitary priority (get)", czdec::cmd_r_generic, czdec::empty, czdec::reply_r_sanitary_priority, czdec::empty},
 		
@@ -1019,14 +1023,34 @@ comfortzone_heatpump::PROCESSED_FRAME_TYPE czdec::process_frame(comfortzone_heat
 							return comfortzone_heatpump::PFT_QUERY;
 
 				case 'W':
-							DPRINT(kr_decoder[i].reg_name);
-							DPRINTLN(" (set): ");
+						{
+						int j;
+						W_CMD *w_cmd = (W_CMD*)czph;
+						
+						DPRINT("[COMMAND] ");
+						DPRINT(kr_decoder[i].reg_name);
+						DPRINT(" - Reg: ");
+						
+						for(j = 0; j < 9; j++)
+						{
+							if(w_cmd->cz_head.reg_num[j] < 0x10) DPRINT("0");
+							DPRINT(w_cmd->cz_head.reg_num[j], HEX);
+							if(j < 8) DPRINT(" ");
+						}
+						
+						DPRINT(" Value: ");
+						if(w_cmd->reg_value[0] < 0x10) DPRINT("0");
+						DPRINT(w_cmd->reg_value[0], HEX);
+						DPRINT(" ");
+						if(w_cmd->reg_value[1] < 0x10) DPRINT("0");
+						DPRINT(w_cmd->reg_value[1], HEX);
+						DPRINTLN("");
 
-							kr_decoder[i].cmd_w(cz_class, &kr_decoder[i], (W_CMD*)czph);
+						kr_decoder[i].cmd_w(cz_class, &kr_decoder[i], (W_CMD*)czph);
 
-							DPRINTLN("====================================================");
-							return comfortzone_heatpump::PFT_QUERY;
-												
+						DPRINTLN("====================================================");
+						return comfortzone_heatpump::PFT_QUERY;
+						}
 				case 'r':
 							DPRINT(kr_decoder[i].reg_name);
 							DPRINTLN(" (reply get): ");
@@ -1091,5 +1115,43 @@ void czdec::dump_frame(comfortzone_heatpump *cz_class, const char *prefix)
 
 	DPRINT(" => ");
 	DPRINTLN(cz_class->cz_size, HEX);
+}
+
+// debug helper: print raw payload (hex) for frames matched to unknown short registers
+void czdec::reply_r_log_raw(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_REPLY *p)
+{
+	int i;
+	int payload_start = sizeof(CZ_PACKET_HEADER) + 1; // skip header and wanted_reply_size byte
+	
+	DPRINT("[RESPONSE] ");
+	DPRINT(kr->reg_name);
+	DPRINT(" - Reg: ");
+	
+	// Print reg_num (9 bytes after packet header)
+	CZ_PACKET_HEADER *hdr = (CZ_PACKET_HEADER*)czhp->cz_buf;
+	for(i = 0; i < 9; i++)
+	{
+		if(hdr->reg_num[i] < 0x10) DPRINT("0");
+		DPRINT(hdr->reg_num[i], HEX);
+		if(i < 8) DPRINT(" ");
+	}
+	
+	DPRINT(" Payload: ");
+	// Print payload (everything after reg_num + 9 bytes, excluding CRC at end)
+	int payload_len = czhp->cz_size - payload_start - 1; // -1 for trailing CRC
+	if(payload_len > 0)
+	{
+		for(i = payload_start; i < czhp->cz_size - 1; i++)
+		{
+			if(czhp->cz_buf[i] < 0x10) DPRINT("0");
+			DPRINT(czhp->cz_buf[i], HEX);
+			DPRINT(" ");
+		}
+	}
+	else
+	{
+		DPRINT("(empty)");
+	}
+	DPRINTLN("");
 }
 
