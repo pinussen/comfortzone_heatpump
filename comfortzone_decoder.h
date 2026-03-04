@@ -58,6 +58,8 @@ class czdec
 	static void reply_r_sanitary_priority(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_REPLY *p);
 	static void reply_r_day_delay(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_REPLY *p);
 	static void reply_r_fan_speed(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_REPLY *p);
+	// debug: log raw payload for unknown short registers
+	static void reply_r_log_raw(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_REPLY *p);
 	static void reply_r_language(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_REPLY *p);
 	static void reply_r_digit(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_REPLY *p);
 	static void reply_r_clr_alarm(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_REPLY *p);
