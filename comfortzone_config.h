@@ -18,15 +18,13 @@
 // uncomment to enable debug mode
 //#define DEBUG
 
-// Serial console
-// uncomment and set to serial port where debug data should be sent
-//#define OUTSER Serial
-
 #define COMFORTZONE_HEATPUMP_LAST_MESSAGE_BUFFER_SIZE 256
 
-#if defined(DEBUG) && defined(OUTSER)
-#define DPRINT(args...)    OUTSER.print(args)
-#define DPRINTLN(args...)  OUTSER.println(args)
+#if defined(DEBUG)
+#include "esphome/core/log.h"
+static const char *TAG = "comfortzone";
+#define DPRINT(args...)    ESP_LOGD(TAG, args)
+#define DPRINTLN(args...)  ESP_LOGD(TAG, args)
 #else
 #define DPRINT(args...)
 #define DPRINTLN(args...)
