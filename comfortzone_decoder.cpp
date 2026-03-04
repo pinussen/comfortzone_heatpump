@@ -6,6 +6,11 @@
 
 #include "string.h"
 
+#ifdef USE_ESPHOME
+#include "esphome/core/log.h"
+static const char *TAG = "comfortzone";
+#endif
+
 static czdec::KNOWN_REGISTER kr_decoder[] =
 	{
 #if HP_PROTOCOL == HP_PROTOCOL_1_6
@@ -1123,6 +1128,35 @@ void czdec::reply_r_log_raw(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_RE
 	int i;
 	int payload_start = sizeof(CZ_PACKET_HEADER) + 1; // skip header and wanted_reply_size byte
 	
+	#ifdef USE_ESPHOME
+	// Build hex string for register number
+	char reg_hex[32];
+	char *reg_ptr = reg_hex;
+	CZ_PACKET_HEADER *hdr = (CZ_PACKET_HEADER*)czhp->cz_buf;
+	for(i = 0; i < 9; i++)
+	{
+		reg_ptr += sprintf(reg_ptr, "%02X", hdr->reg_num[i]);
+		if(i < 8) reg_ptr += sprintf(reg_ptr, " ");
+	}
+	
+	// Build hex string for payload
+	char payload_hex[256];
+	char *payload_ptr = payload_hex;
+	int payload_len = czhp->cz_size - payload_start - 1; // -1 for trailing CRC
+	if(payload_len > 0)
+	{
+		for(i = payload_start; i < czhp->cz_size - 1; i++)
+		{
+			payload_ptr += sprintf(payload_ptr, "%02X ", czhp->cz_buf[i]);
+		}
+	}
+	else
+	{
+		sprintf(payload_hex, "(empty)");
+	}
+	
+	ESP_LOGD(TAG, "[RESPONSE] %s - Reg: %s Payload: %s", kr->reg_name, reg_hex, payload_hex);
+	#else
 	DPRINT("[RESPONSE] ");
 	DPRINT(kr->reg_name);
 	DPRINT(" - Reg: ");
@@ -1153,5 +1187,6 @@ void czdec::reply_r_log_raw(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_RE
 		DPRINT("(empty)");
 	}
 	DPRINTLN("");
+	#endif
 }
 
