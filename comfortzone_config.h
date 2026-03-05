@@ -24,7 +24,7 @@
 #define DPRINT(...) Serial.printf("[D][comfortzone] " __VA_ARGS__)
 #define DPRINTLN(...) do { DPRINT(__VA_ARGS__); Serial.println(); } while (0)
 #elif defined(USE_ESPHOME)
-#include "esphome/core/log.h"
+#include <esp_log.h>
 static const char *TAG = "comfortzone";
 #define DPRINT(args...)   ESP_LOGD(TAG, args)
 #define DPRINTLN(args...) ESP_LOGD(TAG, args)
