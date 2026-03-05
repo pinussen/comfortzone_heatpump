@@ -1123,7 +1123,6 @@ void czdec::reply_r_log_raw(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_RE
 	int i;
 	int payload_start = sizeof(CZ_PACKET_HEADER) + 1; // skip header and wanted_reply_size byte
 	
-	#ifdef USE_ESPHOME
 	// Build hex string for register number
 	char reg_hex[32];
 	char *reg_ptr = reg_hex;
@@ -1150,38 +1149,6 @@ void czdec::reply_r_log_raw(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_RE
 		sprintf(payload_hex, "(empty)");
 	}
 	
-	ESP_LOGD(TAG, "[RESPONSE] %s - Reg: %s Payload: %s", kr->reg_name, reg_hex, payload_hex);
-	#else
-	DPRINT("[RESPONSE] ");
-	DPRINT(kr->reg_name);
-	DPRINT(" - Reg: ");
-	
-	// Print reg_num (9 bytes after packet header)
-	CZ_PACKET_HEADER *hdr = (CZ_PACKET_HEADER*)czhp->cz_buf;
-	for(i = 0; i < 9; i++)
-	{
-		if(hdr->reg_num[i] < 0x10) DPRINT("0");
-		DPRINT(hdr->reg_num[i], HEX);
-		if(i < 8) DPRINT(" ");
-	}
-	
-	DPRINT(" Payload: ");
-	// Print payload (everything after reg_num + 9 bytes, excluding CRC at end)
-	int payload_len = czhp->cz_size - payload_start - 1; // -1 for trailing CRC
-	if(payload_len > 0)
-	{
-		for(i = payload_start; i < czhp->cz_size - 1; i++)
-		{
-			if(czhp->cz_buf[i] < 0x10) DPRINT("0");
-			DPRINT(czhp->cz_buf[i], HEX);
-			DPRINT(" ");
-		}
-	}
-	else
-	{
-		DPRINT("(empty)");
-	}
-	DPRINTLN("");
-	#endif
+	DPRINT("[RESPONSE] %s - Reg: %s Payload: %s\n", kr->reg_name, reg_hex, payload_hex);
 }
 
