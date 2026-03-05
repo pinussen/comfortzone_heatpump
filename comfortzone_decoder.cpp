@@ -6,11 +6,6 @@
 
 #include "string.h"
 
-#ifdef USE_ESPHOME
-#include "esphome/core/log.h"
-static const char *TAG = "comfortzone";
-#endif
-
 static czdec::KNOWN_REGISTER kr_decoder[] =
 	{
 #if HP_PROTOCOL == HP_PROTOCOL_1_6

@@ -20,7 +20,14 @@
 
 #define COMFORTZONE_HEATPUMP_LAST_MESSAGE_BUFFER_SIZE 256
 
-#if defined(DEBUG)
+#ifdef USE_ESPHOME
+#include "esphome.h"
+static const char *TAG = "comfortzone";
+#define DPRINT(args...)    ESP_LOGD(TAG, args)
+#define DPRINTLN(args...)  ESP_LOGD(TAG, args)
+#endif
+
+#if defined(DEBUG) && !defined(USE_ESPHOME)
 #include "esphome/core/log.h"
 static const char *TAG = "comfortzone";
 #define DPRINT(args...)    ESP_LOGD(TAG, args)
