@@ -1120,6 +1120,12 @@ void czdec::dump_frame(comfortzone_heatpump *cz_class, const char *prefix)
 // debug helper: print raw payload (hex) for frames matched to unknown short registers
 void czdec::reply_r_log_raw(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_REPLY *p)
 {
+	#ifdef USE_ESPHOME
+	// In ESPHome, store the payload for external logging via grab_buffer or callback
+	// The ESPHome component can access czhp->cz_buf and format the output
+	return;
+	#endif
+	
 	int i;
 	int payload_start = sizeof(CZ_PACKET_HEADER) + 1; // skip header and wanted_reply_size byte
 	
