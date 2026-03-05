@@ -14,7 +14,6 @@
 #define HP_PROTOCOL HP_PROTOCOL_1_6
 #endif
 
-#undef DEBUG
 // uncomment to enable debug mode
 //#define DEBUG
 
@@ -29,13 +28,11 @@
 static const char *TAG = "comfortzone";
 #define DPRINT(args...)   ESP_LOGD(TAG, args)
 #define DPRINTLN(args...) ESP_LOGD(TAG, args)
-#endif
-
-#if defined(DEBUG) && !defined(USE_ESPHOME)
+#elif defined(DEBUG)
 #include "esphome/core/log.h"
 static const char *TAG = "comfortzone";
-#define DPRINT(args...)    ESP_LOGD(TAG, args)
-#define DPRINTLN(args...)  ESP_LOGD(TAG, args)
+#define DPRINT(args...)   ESP_LOGD(TAG, args)
+#define DPRINTLN(args...) ESP_LOGD(TAG, args)
 #else
 #define DPRINT(args...)
 #define DPRINTLN(args...)
