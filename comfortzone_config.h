@@ -72,6 +72,9 @@ static const char *TAG = "comfortzone";
 #if defined(OUTSER)
 #define NPRINT(args...)    OUTSER.print(args)
 #define NPRINTLN(args...)  OUTSER.println(args)
+#elif defined(USE_ESPHOME) || defined(DEBUG)
+#define NPRINT(args...)   DPRINT(args)
+#define NPRINTLN(args...) DPRINTLN(args)
 #else
 #define NPRINT(args...)
 #define NPRINTLN(args...)
