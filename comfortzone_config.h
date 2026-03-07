@@ -39,6 +39,9 @@ inline void cz_log_print(int v) { ESP_LOGD(TAG, "%d", v); }
 inline void cz_log_print(unsigned int v) { ESP_LOGD(TAG, "%u", v); }
 inline void cz_log_print(long v) { ESP_LOGD(TAG, "%ld", v); }
 inline void cz_log_print(unsigned long v) { ESP_LOGD(TAG, "%lu", v); }
+inline void cz_log_print(float v) { ESP_LOGD(TAG, "%f", v); }
+inline void cz_log_print(double v) { ESP_LOGD(TAG, "%f", v); }
+inline void cz_log_print() { ESP_LOGD(TAG, ""); }
 
 template<typename T>
 inline void cz_log_print(T v, int base) {
