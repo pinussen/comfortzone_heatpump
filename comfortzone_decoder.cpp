@@ -159,6 +159,7 @@ static czdec::KNOWN_REGISTER kr_decoder[] =
 
 		//41444452078a656fde02c672010203040b0801c70200008403cc0119014e002400db002d0100002d0138ff97ffb8fff8fd00002d012d012d012d0100000f013403740888133601000000000000000000005e01000000000000000000005c2b00004f09000000004f0900004809000
 		{ {0x01, 0x02, 0x03, 0x04, 0x0B, 0x08, 0x01, 0xC7, 0x02}, czcraft::KR_UNCRAFTABLE, "Status 06", czdec::cmd_r_generic, czdec::empty, czdec::reply_r_status_06_v170, czdec::reply_w_generic},	// 0xC2 bytes
+		{ {0x01, 0x02, 0x03, 0x04, 0x0B, 0x08, 0x01, 0xB4, 0x02}, czcraft::KR_UNCRAFTABLE, "Status xx (0xc7 bytes long frame)", czdec::cmd_r_generic, czdec::empty, czdec::reply_r_status_v180_xc7, czdec::reply_w_generic},	// 0xc1 bytes
 
 		// Status 15, just a bunch of timestamps?
 		//41  44  44  52  07  8a  65  6f  de  02  c8  72  01  02  03  04  0b  08  03  15  0d  17  0d  0b  17  14  36  32  00  00  00  00  00  00  00  00  0d  0b  17  16  1c  04  00  00  00  00  00  00  00  00  12  0b  17  11  2a  1b  00  00  00  00  00  00  00  00  13  0b  17  0b  2e  2d  00  00  00  00  00  00  00  00  13  0b  17  0d  0f  2c  00  00  00  00  00  00  00  00  13  0b  17  0d  26  1f  00  00  00  00  00  00  00  00  13  0b  17  0d  27  28  00  00  00  00  00  00  00  00  13  0b  17  0d  33  2f  00  00  00  00  00  00  00  00  13  0b  17  0d  35  12  00  00  00  00  00  00  00  00  13  0b  17  0d  36  0e  00  00  00  00  00  00  00  00  13  0b  17  0d  37  27  00  00  00  00  00  00  00  00  13  0b  17  0d  39  03  00  00  00  00  00  00  00  00  13  0b  17  16  27  26  00  00  00  c8
@@ -199,6 +200,7 @@ static czdec::KNOWN_REGISTER kr_decoder[] =
 		//65  68  68  82  07  138 101 111 222 02  86  114 01  02  03  04  11  08  05  00  00    89  49  25  07  37  17  35  00  00  00  00  00  48  48  48  48  19  71  00  00  177 34  00  00  249 20  00  00  65  09  00  00  00  00  00  00  00  00  00  00  00  00  00  00  51  143 76  00  61  34  07  00  127 64  12  00  131 198 16  00  234 26  49  00  160
 		//A   D   D   R   .   .   e   o   .   .   V   r   .   .   .   .   .   .   .   .   .     Y   1   .   .   %   .   #   .   .   .   .   .   0   0   0   0   .   G   .   .   .   "   .   .   .   .   .   .   A   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   3   .   L   .   =   "   .   .   .   @   .   .   .   .   .   .   .   .   1   .   .
 		{ {0x01, 0x02, 0x03, 0x04, 0x0B, 0x08, 0x05, 0x00, 0x00}, czcraft::KR_UNCRAFTABLE, "Status 08", czdec::cmd_r_generic, czdec::empty, czdec::reply_r_status_08, czdec::reply_w_generic},	// 0x50 bytes
+		{ {0x01, 0x02, 0x03, 0x04, 0x0B, 0x08, 0x00, 0x20, 0x03}, czcraft::KR_UNCRAFTABLE, "Status (settings)", czdec::cmd_r_generic, czdec::empty, czdec::reply_r_status_v180_settings, czdec::reply_w_generic},
     	
 		//Data: 656fde02d35e414444521857010203040b0881130000049c
     	//Data: 41444452078a656fde021777010203040b088113000434
@@ -1151,4 +1153,3 @@ void czdec::reply_r_log_raw(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_RE
 	
 	DPRINT("[RESPONSE] %s - Reg: %s Payload: %s\n", kr->reg_name, reg_hex, payload_hex);
 }
-
