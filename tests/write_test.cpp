@@ -281,6 +281,7 @@ int main(int argc, char **argv) {
       assert(!hp.begin_write(kind,std::numeric_limits<float>::infinity()));
     }
     assert(!hp.begin_write(Kind::FAN_SPEED,0)); assert(!hp.begin_write(Kind::FAN_SPEED,4));
+    assert(!hp.begin_write(Kind::HEATING_CURVE,0));
     assert(!hp.begin_write(Kind::HEATING_CURVE,11)); assert(!hp.begin_write(Kind::EXTRA_HOT_WATER,2));
     assert(bus.writes==0);
   }

@@ -205,7 +205,7 @@ void comfortzone_heatpump::set_grab_buffer(byte *buffer, uint16_t buffer_size, u
 
 // fan speed: 1 = low, 2 = normal, 3 = fast, 4 = on timer (HP v1.8)
 bool comfortzone_heatpump::set_heating_curve(uint8_t curve, int timeout) {
-    if (curve > 10) { RETURN_MESSAGE("Heating curve must be 0..10"); return false; }
+    if (curve < 1 || curve > 10) { RETURN_MESSAGE("Heating curve must be 1..10"); return false; }
     auto *kr = czdec::kr_craft_name_to_index(czcraft::KR_HEATING_CURVE);
     if (!kr) { RETURN_MESSAGE("Heating curve is not mapped for this protocol"); return false; }
     W_SMALL_CMD cmd; W_REPLY reply;

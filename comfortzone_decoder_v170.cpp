@@ -44,7 +44,7 @@ bool czdec::decode_v170_ranges(comfortzone_heatpump *hp, CZ_PACKET_HEADER *frame
     if (r.start + r.size > 0x10000) return false;
     auto &s = hp->comfortzone_status;
     if (frame->reg_num[6] == 0) {
-        if (auto p = r.at(0x2a5,1)) { if (*p <= 10) s.heating_curve = *p; }
+        if (auto p = r.at(0x2a5,1)) { if (*p >= 1 && *p <= 10) s.heating_curve = *p; }
         if (auto p = r.at(0x2a6,2)) { auto v=get_uint16(p); if (v>=100 && v<=500) s.room_heating_setting=v; }
         if (auto p = r.at(0x373,2)) { auto v=get_uint16(p); if (v<=1000) s.hot_water_setting=v; }
         if (auto p = r.at(0x3fa,1)) { if (*p>=1 && *p<=3) s.fan_speed=*p; }
