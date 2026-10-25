@@ -102,7 +102,8 @@ class comfortzone_heatpump
 	void set_heatpump_addr(byte new_heatpump_addr[4]);
 	void set_controller_addr(const byte address[4]);
 	// Explicit site-specific assumption: zero-only traffic after a valid pump
-	// reply is idle filler. Nonzero bytes revoke it until the next valid reply.
+	// reply is idle filler. Isolated 0x40 framing artifacts restart the quiet
+	// timer; other nonzero bytes revoke permission until the next valid reply.
 	void set_zero_byte_idle(bool enabled) { zero_byte_idle_ = enabled; }
 
 	// try to guess heatpump address (if needed, must be called after begin)
@@ -144,7 +145,13 @@ class comfortzone_heatpump
 	uint32_t bus_frame_time_ = 0;
 	bool bus_reply_seen_ = false;
 	bool zero_byte_idle_ = false;
-	bool zero_tail_since_reply_ = false;
+	bool idle_tail_since_reply_ = false;
+	uint32_t last_nonzero_rx_time_ = 0;
+	bool zero_byte_idle_ready_(uint32_t now) const {
+		return zero_byte_idle_ && idle_tail_since_reply_ && bus_reply_seen_ &&
+		       now - bus_frame_time_ >= 40 && now - bus_frame_time_ < 1000 &&
+		       now - last_nonzero_rx_time_ >= 40;
+	}
 	float write_value_ = 0;
 	char write_wait_detail_[128] = {};
 	void observe_write_frame_(bool valid_crc);

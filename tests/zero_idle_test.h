@@ -16,7 +16,23 @@ inline void test_zero_byte_idle() {
     assert(bus.writes==1 && !bus.sending && !bus.physical_idle_break);
     bus.feed(ack(bus)); hp.process(); assert(hp.write_result()==Result::SUCCESS);
   }
-  for (const auto &tail : {std::vector<byte>{0x40}, std::vector<byte>{0x65,0x6f,0xde,2}}) {
+  {
+    Bus bus; comfortzone_heatpump hp(&bus); hp.set_zero_byte_idle(true);
+    assert(hp.begin_write(Kind::MINUTE,12)); ready(hp,bus);
+    // Observed idle runs have isolated 0x40 among zeros. Each one restarts
+    // the quiet timer, and must have shifted out of the parser before TX.
+    for(int i=0;i<4;++i) {
+      test_millis+=20; bus.feed({0x40}); hp.process(); hp.poll_write();
+      assert(bus.writes==0);
+    }
+    for(int i=0;i<39;++i) {
+      ++test_millis; bus.feed({0}); hp.process(); hp.poll_write();
+      assert(bus.writes==0);
+    }
+    ++test_millis; bus.feed({0}); hp.process(); hp.poll_write();
+    assert(bus.writes==1);
+  }
+  for (const auto &tail : {std::vector<byte>{0x41}, std::vector<byte>{0x65,0x6f,0xde,2}}) {
     Bus bus; comfortzone_heatpump hp(&bus); hp.set_zero_byte_idle(true);
     assert(hp.begin_write(Kind::MINUTE,12)); ready(hp,bus);
     bus.feed(tail); hp.process();

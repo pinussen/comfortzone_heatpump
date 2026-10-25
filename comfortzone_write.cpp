@@ -58,7 +58,7 @@ void comfortzone_heatpump::poll_write() {
     } else if (bus_reply_seen_ && now - bus_frame_time_ >= 40 &&
                now - bus_frame_time_ < 1000 &&
                (now - last_rx_byte_time_ >= 40 || rs485->idle_break(100) ||
-                (zero_byte_idle_ && zero_tail_since_reply_))) {
+                zero_byte_idle_ready_(now))) {
       const int unread = rs485->available();
       if (cz_size != 0 || unread != 0) {
         int used = std::snprintf(write_wait_detail_, sizeof(write_wait_detail_),
@@ -92,7 +92,7 @@ void comfortzone_heatpump::observe_write_frame_(bool valid_crc) {
   const auto *header = reinterpret_cast<const CZ_PACKET_HEADER *>(cz_buf);
   bus_reply_seen_ = valid_crc && std::memcmp(header->source, heatpump_addr, 4) == 0 &&
                     (header->cmd == 'r' || header->cmd == 'w');
-  zero_tail_since_reply_ = bus_reply_seen_;
+  idle_tail_since_reply_ = bus_reply_seen_;
   if (!valid_crc || write_result_ != WriteResult::WAITING_FOR_REPLY ||
       bus_frame_time_ - write_sent_ >= 200 || cz_size != write_reply_size_ ||
       std::memcmp(cz_buf, write_reply_, sizeof(CZ_PACKET_HEADER)) != 0) return;

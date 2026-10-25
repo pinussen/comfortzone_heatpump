@@ -138,9 +138,11 @@ with synthetic ACKs, not confirmed by a live write/readback pair on 170.
 `set_zero_byte_idle(true)` explicitly treats a zero-only suffix after a
 CRC-valid pump reply as idle filler. It is disabled by default. Transmission
 still requires a reply age of 40–999 ms, an empty UART and no partial frame.
-Only a zero-only parser tail may be cleared. Any nonzero byte after that reply
-revokes the override until a new valid pump reply, even if the parser later
-shifts the nonzero byte out. Requests, bad CRCs and other senders do not grant
+Only a zero-only parser tail may be cleared. An isolated `0x40`, observed
+among the idle zeros, restarts a 40 ms nonzero-free timer. Any other nonzero
+byte revokes the override until a new valid pump reply, even if the parser
+later shifts that byte out. This exception is an explicit hypothesis about
+the local receive signal, not a proven protocol heartbeat. Requests, bad CRCs and other senders do not grant
 permission. ACK matching and the no-retry rule are unchanged.
 
 This is a site-specific assumption authorized for the EX50 investigation,
