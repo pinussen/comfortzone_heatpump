@@ -70,3 +70,46 @@ python3 tests/run_host_tests.py --fastcrc /path/to/FastCRC --protocol 221
 Tests use a fake UART/clock plus ASan/UBSan. Other-protocol tests exercise register
 lengths, not physical pumps or semantic accuracy. Capture replay and Python tests
 live in the ESPHome repository. Tests do not contact a pump.
+
+## Operating status and power correlation (2026-10-25)
+
+`operating_170(now_ms)` returns a time-qualified result; callers must query it
+periodically, including during bus silence. The legacy `comfortzone_status.mode`
+and activity subscribers are not used for this 170 result, because they cannot
+expire on their own. Ordinary scalar readbacks remain unchanged.
+
+The complete block at bank 01:0017..001b is compared with observed profiles:
+
+| Bytes | Interpretation | Evidence |
+| --- | --- | --- |
+| 28 2A 00 00 10 | House heating, when paired with positive compressor measurements | User's panel comparison, and later passive heating cycle |
+| 2B/28 2E 00 00 10 | Hot water, including after boost is switched off | User's panel comparison during boost/on/off sequence |
+| 28 2C 00 00 10 | Hot water | Earlier capture with zero heating request and positive hot-water request; agrees with 1.80 logic, no independent panel confirmation for this exact profile |
+| 28 08 00 00 10 | Idle, only with a complete zero-power snapshot | Captured zero frequency and all measured powers zero |
+| 28 AE/BE 00 00 10 | Unknown transition | Captured ramp-down sequence |
+| 28 1E 00 00 16 | Unknown mode; stopped compressor if complete power snapshot is zero | User saw a flashing snowflake and later zero values; defrost is plausible but not established |
+
+The older 1.80 mode named “heating and hot water” sets only the hot-water
+production flag. The panel confirms hot-water priority for 2E. It must not be
+interpreted as equal energy allocation to heating and water.
+
+A complete power reply must contain 01:02e9..0322: actual frequency, output,
+additional power, total power and input. It must follow the complete status by
+at most 2 seconds. Changed status invalidates the previous nonzero pairing.
+Both snapshots expire after 15 seconds (normal polling is about 7 seconds).
+Unsigned timestamp subtraction supports millis wraparound. Partial replies,
+CRC errors, other senders and other protocol prefixes cannot create a pair.
+
+With a recognized active mode, positive measurements, zero additional power
+and total output equal to compressor output, input goes entirely to that mode.
+CoP is pump-reported output/input, not an independent efficiency measurement.
+Inactive CoP is undefined. Unknown transitions, stale samples and additional
+heater operation deliberately leave allocated power/CoP unknown. A fresh
+complete snapshot containing zero frequency and zero powers establishes zero
+allocation for both uses, without assigning an unproven operating mode.
+
+`tests/v170_status_fixtures.json` records captured frame bytes and provenance.
+The host tests cover panel transitions, captured idle/water profiles, incomplete
+and corrupt replies, changed status, staleness, zero division, additional power,
+and timestamp wraparound. Raw profile interpretation is intentionally narrow;
+this is not a complete definition of all status bits or defrost states.

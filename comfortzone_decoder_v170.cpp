@@ -1,5 +1,6 @@
 #include "comfortzone_decoder.h"
 #include "comfortzone_registers_v170.h"
+#include "comfortzone_tools.h"
 #include <cstring>
 
 namespace {
@@ -51,6 +52,15 @@ bool czdec::decode_v170_ranges(comfortzone_heatpump *hp, CZ_PACKET_HEADER *frame
         }
     }
     if (frame->reg_num[6] == 1) {
+        const auto now = static_cast<uint32_t>(millis());
+        if (const auto status = r.at(0x17, 5)) hp->operating_170_.status(status, now);
+        // One contiguous snapshot must cover frequency and every power field;
+        // do not combine a partial reply with previously cached scalar values.
+        if (const auto power = r.at(0x2e9, 0x323-0x2e9)) {
+            hp->operating_170_.power(get_uint16(power), get_uint16(power+0x313-0x2e9),
+                get_uint16(power+0x317-0x2e9), get_uint16(power+0x319-0x2e9),
+                get_uint16(power+0x321-0x2e9), now);
+        }
         // Both the short six-byte clock and larger temperature snapshots.
         if (auto p=r.at(4,6)) {
             if (valid_date(p,6)) {

@@ -26,6 +26,7 @@
 
 #include <comfortzone_config.h>
 #include <comfortzone_status.h>
+#include <comfortzone_operating_v170.h>
 #include <platform_specific.h>
 #include <rs485_interface.h>
 
@@ -107,9 +108,17 @@ class comfortzone_heatpump
 	// current status
 	COMFORTZONE_STATUS comfortzone_status;
 
+#if HP_PROTOCOL == HP_PROTOCOL_1_7
+	ComfortzoneOperating170::Result operating_170(uint32_t now) const { return operating_170_.result(now); }
+#endif
+
 	private:
 	friend class czdec;
 	friend class czcraft;
+
+#if HP_PROTOCOL == HP_PROTOCOL_1_7
+	ComfortzoneOperating170 operating_170_;
+#endif
 
 	RS485Interface *rs485;
 

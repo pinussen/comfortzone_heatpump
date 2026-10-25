@@ -39,6 +39,21 @@ with tempfile.TemporaryDirectory(prefix="comfortzone-tests-") as tmp:
         (Path(tmp) / "frequency_fixture.h").write_text(
             "static const struct { int16_t frequency; std::vector<byte> raw; } frequency_cases[] = {" +
             ",".join(rows) + "};")
+    if args.protocol == 170:
+        cases = json.loads((ROOT / "tests/v170_status_fixtures.json").read_text())["frames"]
+        modes = {"unknown": "CZMD_UNKNOWN", "idle": "CZMD_IDLE", "heating": "CZMD_ROOM_HEATING", "hot_water": "CZMD_HOT_WATER"}
+        activities = {"unknown": "CZCMP_UNKNOWN", "running": "CZCMP_RUNNING", "stopped": "CZCMP_STOPPED"}
+        def number(v): return "NAN" if v is None else str(float(v)) + "f"
+        rows = []
+        for c in cases:
+            rows.append("{" + ",".join([
+                "true" if "power" not in c["label"] else "false",
+                modes[c["expected_mode"]], activities[c["expected_activity"]],
+                number(c["expected_heating"]), number(c["expected_water"]),
+                "{" + ",".join(map(str, bytes.fromhex(c["raw"]))) + "}"]) + "}")
+        (Path(tmp) / "status_fixture.h").write_text(
+            "static const struct { bool reset; COMFORTZONE_MODE mode; COMFORTZONE_COMPRESSOR_ACTIVITY activity; "
+            "float heating, water; std::vector<byte> raw; } status_cases[] = {" + ",".join(rows) + "};")
     subprocess.run([
         "g++", "-std=c++17", "-g", "-O1", "-fsanitize=address,undefined",
         "-fno-sanitize-recover=all", "-fno-omit-frame-pointer", f"-DHP_PROTOCOL={args.protocol}",
@@ -48,7 +63,7 @@ with tempfile.TemporaryDirectory(prefix="comfortzone-tests-") as tmp:
         str(ROOT / "tests" / ("write_test.cpp" if args.protocol == 170 else "protocol_smoke.cpp")),
         *map(str, sorted(lib.glob("*.cpp"))),
         str(args.fastcrc / "src/FastCRCsw.cpp"), "-o", str(binary)
-    ], check=True, timeout=120)
+    ], check=True, timeout=300)
     frames = Path(tmp) / "frames.bin"
     with frames.open("wb") as output:
         for pcap in args.pcaps:
