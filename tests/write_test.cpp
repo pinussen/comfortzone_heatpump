@@ -310,6 +310,17 @@ int main(int argc, char **argv) {
     feed(reply(1,4,{23,59,59,29,2,25})); assert(s.year==2024); // Invalid non-leap date.
     feed(reply(1,4,{24,0,0,1,1,26})); assert(s.year==2024);
     feed(reply(5,0x2c,{0xff,0xff,0xff,0xff})); assert(s.compressor_energy==0xffffffffU);
+    // The schema must preserve signed raw values, bounds and field completeness.
+    feed(reply(1,0x32,{0x85,0xff})); assert(s.sensors_te0_outdoor_temp==-123);
+    feed(reply(0,0x3ec,{0x85,0xff})); assert(s.hot_water_extra_setting==-123);
+    feed(reply(0,0x2a5,{0})); feed(reply(0,0x2a5,{11})); assert(s.heating_curve==5);
+    feed(reply(0,0x2a6,{99,0})); feed(reply(0,0x2a6,{0xf5,1})); assert(s.room_heating_setting==320);
+    feed(reply(0,0x373,{0xe9,3})); assert(s.hot_water_setting==531);
+    feed(reply(5,0x2c,{1,2,3})); feed(reply(5,0x2f,{4})); assert(s.compressor_energy==0xffffffffU);
+    auto other_version=reply(1,0x32,{0,0}); other_version[17]=9; crc(other_version); feed(other_version);
+    assert(s.sensors_te0_outdoor_temp==-123);
+    feed(reply(0,0x32,{0,0})); assert(s.sensors_te0_outdoor_temp==-123);
+    feed(reply(1,0xffff,{1,2,3})); assert(s.sensors_te0_outdoor_temp==-123);
     // Partial range fuzz: sanitizers verify every advertised payload length.
     for (int bank : {0,1,3,5,255}) for (int size=0;size<=233;++size)
       feed(reply(bank,bank==0 ? 0x2a0 : 0,std::vector<byte>(size,0x6a)));

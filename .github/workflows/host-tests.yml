@@ -13,3 +13,5 @@ jobs:
           git clone https://github.com/vinnyspb/FastCRC.git /tmp/FastCRC
           git -C /tmp/FastCRC checkout c25258960e313a68237bf62db08770707955b82b
       - run: python3 tests/run_host_tests.py --fastcrc /tmp/FastCRC --protocol ${{ matrix.protocol }}
+      - if: matrix.protocol == 170
+        run: python3 -m unittest discover -s tests -p 'test_*.py'

@@ -25,6 +25,21 @@ current CRC-valid reply from the configured pump are published. No partial-field
 cache is used. `Subscribable::has_value()` distinguishes missing from zero.
 Unverified mode bits are not borrowed from another protocol version.
 
+The 34 ordinary scalar fields are now defined in `registers_v170.json`.
+`python3 tools/generate_registers.py` validates the schema and generates
+`comfortzone_registers_v170.h` and [REGISTERS-170.md](REGISTERS-170.md).
+Use `--check` to detect stale generated files. CI also checks the schema.
+ESPHome vendors the schema together with the C++ sources; its offline analyzer
+reads this same file. The table is read-only: write commands and validation
+remain in the existing write engine. Clock/calendar validation, derived alarm
+flags, history and experimental float arrays remain separate.
+
+`divisor` and `invalid_raw` describe presentation, while C++ status subscribers
+continue receiving raw integers including sensor sentinels. Evidence is marked
+per field: `inherited` is the existing interpretation, `capture` is supported by
+captured comparisons, and `panel` has supporting panel observations. This
+migration does not promote inherited interpretations to verified meanings.
+
 Actual compressor frequency is **01:02e9, LE16 / 10 Hz**, corrected after a
 panel-observed heating -> extra hot water -> stop sequence on 2026-10-25.
 The old 01:02d5 field remained at 29.3 Hz while the panel showed 30.0 Hz and
