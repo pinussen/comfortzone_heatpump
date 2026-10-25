@@ -113,3 +113,16 @@ The host tests cover panel transitions, captured idle/water profiles, incomplete
 and corrupt replies, changed status, staleness, zero division, additional power,
 and timestamp wraparound. Raw profile interpretation is intentionally narrow;
 this is not a complete definition of all status bits or defrost states.
+
+## Clock writes
+
+Protocol 170 now maps the existing single-byte hour/minute commands at 01:0004
+and 01:0005, matching observed clock readbacks and older-version write maps.
+`WriteKind::HOUR` and `MINUTE` use the asynchronous engine and strict echoed
+value ACK matching. Bounds, fractional inputs, and non-finite values are
+rejected before narrowing conversions. An ACK does not update the clock cache;
+only a later valid full clock reply advances `clock_read_sequence()` and
+`clock_read_time()`. The ESPHome time-sync command uses that independent readback.
+Date, seconds, automatic DST, display luminosity and sensor offset writes are
+not newly mapped for 170. Existence of legacy setters is not evidence of a
+working 170 register mapping.

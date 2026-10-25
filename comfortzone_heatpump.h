@@ -48,7 +48,7 @@ class comfortzone_heatpump
 
 	// Non-blocking writes: accepted is not acknowledged. Call process() and
 	// poll_write() from the main loop, then inspect write_result().
-	enum class WriteKind { ROOM_TEMPERATURE, HOT_WATER_TEMPERATURE, SENSOR_OFFSET, FIREPLACE, FAN_SPEED, EXTRA_HOT_WATER, HEATING_CURVE };
+	enum class WriteKind { ROOM_TEMPERATURE, HOT_WATER_TEMPERATURE, SENSOR_OFFSET, FIREPLACE, FAN_SPEED, EXTRA_HOT_WATER, HEATING_CURVE, HOUR, MINUTE };
 	enum class WriteResult { IDLE, WAITING_FOR_BUS, WAITING_FOR_REPLY, SUCCESS, FAILED };
 	bool begin_write(WriteKind kind, float value, uint16_t sensor = 0);
 	void poll_write();
@@ -109,6 +109,8 @@ class comfortzone_heatpump
 	COMFORTZONE_STATUS comfortzone_status;
 
 #if HP_PROTOCOL == HP_PROTOCOL_1_7
+	uint32_t clock_read_sequence() const { return clock_read_sequence_; }
+	uint32_t clock_read_time() const { return clock_read_time_; }
 	ComfortzoneOperating170::Result operating_170(uint32_t now) const { return operating_170_.result(now); }
 #endif
 
@@ -118,6 +120,7 @@ class comfortzone_heatpump
 
 #if HP_PROTOCOL == HP_PROTOCOL_1_7
 	ComfortzoneOperating170 operating_170_;
+	uint32_t clock_read_sequence_{0}, clock_read_time_{0};
 #endif
 
 	RS485Interface *rs485;

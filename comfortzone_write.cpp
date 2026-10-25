@@ -13,7 +13,8 @@ bool comfortzone_heatpump::begin_write(WriteKind kind, float value, uint16_t sen
     return false;
   }
   if ((kind == WriteKind::FAN_SPEED || kind == WriteKind::HEATING_CURVE ||
-       kind == WriteKind::EXTRA_HOT_WATER || kind == WriteKind::FIREPLACE) &&
+       kind == WriteKind::EXTRA_HOT_WATER || kind == WriteKind::FIREPLACE ||
+       kind == WriteKind::HOUR || kind == WriteKind::MINUTE) &&
       (value != std::floor(value) || value < 0 || value > 255)) {
     std::snprintf(last_message, sizeof(last_message), "Expected a non-negative integer setting"); return false;
   }
@@ -34,6 +35,8 @@ bool comfortzone_heatpump::begin_write(WriteKind kind, float value, uint16_t sen
     case WriteKind::FAN_SPEED: accepted = set_fan_speed(static_cast<uint8_t>(value)); break;
     case WriteKind::EXTRA_HOT_WATER: accepted = set_extra_hot_water(value != 0); break;
     case WriteKind::HEATING_CURVE: accepted = set_heating_curve(static_cast<uint8_t>(value)); break;
+    case WriteKind::HOUR: accepted = set_hour(static_cast<uint8_t>(value)); break;
+    case WriteKind::MINUTE: accepted = set_minute(static_cast<uint8_t>(value)); break;
     case WriteKind::FIREPLACE: accepted = set_fireplace_mode(value != 0); break;
   }
   staging_write_ = false;

@@ -361,6 +361,29 @@ int main(int argc, char **argv) {
     assert(hp.comfortzone_status.heatpump_current_compressor_frequency == 0);
     assert(bus.writes == 0 && !bus.sending);
   }
+  {
+    Bus bus; comfortzone_heatpump hp(&bus);
+    assert(!hp.begin_write(Kind::HOUR,24));
+    assert(!hp.begin_write(Kind::HOUR,-1));
+    assert(!hp.begin_write(Kind::MINUTE,60));
+    assert(!hp.begin_write(Kind::MINUTE,10.5f));
+    assert(!hp.begin_write(Kind::MINUTE,NAN));
+    assert(!hp.begin_write(Kind::MINUTE,256));
+    for (auto kind : {Kind::HOUR,Kind::MINUTE}) {
+      assert(hp.begin_write(kind,20)); ready(hp,bus); test_millis+=40; hp.poll_write();
+      assert(bus.sent.size()==23 && bus.sent[11]=='W' && bus.sent[18]==1);
+      assert(bus.sent[19]==(kind==Kind::HOUR?4:5) && bus.sent[20]==0 && bus.sent[21]==20);
+      bus.feed(ack(bus)); hp.process(); assert(hp.write_result()==Result::SUCCESS);
+      assert(hp.clock_read_sequence()==0 && !hp.comfortzone_status.hour.has_value());
+    }
+    auto clock=pump_reply(); clock.resize(28); clock[10]=28; clock[18]=1; clock[19]=4; clock[20]=0;
+    const byte bytes[]={20,20,8,25,10,26}; std::memcpy(clock.data()+21,bytes,6); crc(clock);
+    test_millis+=100; bus.feed(clock); hp.process();
+    assert(hp.clock_read_sequence()==1 && hp.clock_read_time()==test_millis);
+    assert(hp.comfortzone_status.hour==20 && hp.comfortzone_status.minute==20);
+    clock[24]=32; crc(clock); bus.feed(clock); hp.process(); assert(hp.clock_read_sequence()==1);
+    clock[24]=25; clock.back()^=1; bus.feed(clock); hp.process(); assert(hp.clock_read_sequence()==1);
+  }
   size_t replayed = 0;
   if (argc == 2) {
     Bus bus; comfortzone_heatpump hp(&bus);

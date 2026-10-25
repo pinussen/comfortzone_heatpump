@@ -64,6 +64,7 @@ bool czdec::decode_v170_ranges(comfortzone_heatpump *hp, CZ_PACKET_HEADER *frame
         // Both the short six-byte clock and larger temperature snapshots.
         if (auto p=r.at(4,6)) {
             if (valid_date(p,6)) {
+                ++hp->clock_read_sequence_; hp->clock_read_time_ = now;
                 s.hour=p[0]; s.minute=p[1]; s.second=p[2]; s.day=p[3]; s.month=p[4]; s.year=2000+p[5];
                 if (auto weekday=r.at(10,1)) { if (*weekday>=1 && *weekday<=7) s.day_of_week=*weekday; }
             }

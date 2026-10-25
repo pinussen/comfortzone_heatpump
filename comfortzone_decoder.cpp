@@ -81,6 +81,9 @@ static czdec::KNOWN_REGISTER kr_decoder[] =
 #endif
 
 #if HP_PROTOCOL == HP_PROTOCOL_1_7
+        // Clock read bytes match 1.60/1.80: hour 01:0004, minute 01:0005.
+        { {1,2,3,4,0x0b,0x08,1,4,0}, czcraft::KR_HOUR, "Hour", czdec::cmd_r_generic, czdec::cmd_w_digit, czdec::reply_r_digit, czdec::reply_w_generic},
+        { {1,2,3,4,0x0b,0x08,1,5,0}, czcraft::KR_MINUTE, "Minute", czdec::cmd_r_generic, czdec::cmd_w_digit, czdec::reply_r_digit, czdec::reply_w_generic},
         { {1,2,3,4,0x0b,0x08,0x00,0x73,0x03}, czcraft::KR_HOT_WATER_TEMP, "Hot water user setting", czdec::cmd_r_generic, czdec::cmd_w_temp, czdec::reply_r_temp, czdec::reply_w_generic},
         { {1,2,3,4,0x0b,0x08,0x00,0xa5,0x02}, czcraft::KR_HEATING_CURVE, "Heating curve", czdec::cmd_r_generic, czdec::cmd_w_digit, czdec::reply_r_digit, czdec::reply_w_generic},
 
