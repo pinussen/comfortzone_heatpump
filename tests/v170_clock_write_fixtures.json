@@ -1,0 +1,34 @@
+{
+  "capture": "/home/bjwl/comfortzone-zero-idle-release-20261025-205634/capture.pcap",
+  "note": "Both hour and minute writes now live-confirmed, with independent clock readback after fixing the timer epoch mismatch.",
+  "frames": [
+    {
+      "kind": "hour_ack",
+      "time": 1792958255.307812,
+      "raw": "45726963ae23656fde021777010203040b0801040014d5"
+    },
+    {
+      "kind": "clock_readback",
+      "time": 1792958261.079702,
+      "raw": "41444452078a656fde027672010203040b08010400140130190a1a07001501300000400040000000281a00001600000000000000000000000000000000004119fc19fc5e006b010b01ec001d025e01dfffd8ff22fc22fc050122fc22fc22fc22fc22fc22fc22fc22fc22fc22fc22fc22fc22fc0f0260"
+    },
+    {
+      "kind": "hour_21_ack",
+      "capture": "/home/bjwl/comfortzone-zero-idle-release-20261025-210230/capture.pcap",
+      "time": 1792958597.926817,
+      "raw": "45726963ae23656fde021777010203040b08010400158b"
+    },
+    {
+      "kind": "minute_3_ack",
+      "capture": "/home/bjwl/comfortzone-zero-idle-release-20261025-210230/capture.pcap",
+      "time": 1792958604.956233,
+      "raw": "45726963ae23656fde021777010203040b080105000360"
+    },
+    {
+      "kind": "synchronized_clock_readback",
+      "capture": "/home/bjwl/comfortzone-zero-idle-release-20261025-210230/capture.pcap",
+      "time": 1792958610.719115,
+      "raw": "41444452078a656fde027672010203040b08010400150324190a1a07001503240000400040000000281a00001600000000000000000000000000000000004119fc19fc5e0001010b01ec0015010c015200830022fc22fc050122fc22fc22fc22fc22fc22fc22fc22fc22fc22fc22fc22fc22fc0f0214"
+    }
+  ]
+}

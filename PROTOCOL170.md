@@ -147,3 +147,17 @@ permission. ACK matching and the no-retry rule are unchanged.
 
 This is a site-specific assumption authorized for the EX50 investigation,
 not proof that zero bytes universally mean an electrically undriven bus.
+
+With this policy, a live hour write to 20 was acknowledged on 2026-10-25,
+followed by an independent full clock readback showing hour 20. Captured
+frames are in `tests/v170_clock_write_fixtures.json`. The subsequent minute
+stage initially aborted because the ESPHome adapter compared FreeRTOS ticks
+against decoder timestamps from `esp_timer_get_time()`, whose epoch differs.
+Callers should use `clock_read_age()` and the no-argument `operating_170()`
+to let the library evaluate freshness using the same timer as the decoder.
+
+After that correction, the live synchronization at 21:03 on 2026-10-25
+acknowledged hour 21 and minute 3 and confirmed both in a subsequent full
+clock reply. Final offset was about +4.6 seconds (seconds are not written).
+The captured minute ACK and full readback are regression-tested, and both
+hour/minute evidence frames are preserved in `tests/v170_clock_write_fixtures.json`.
