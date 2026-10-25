@@ -126,3 +126,9 @@ only a later valid full clock reply advances `clock_read_sequence()` and
 Date, seconds, automatic DST, display luminosity and sensor offset writes are
 not newly mapped for 170. Existence of legacy setters is not evidence of a
 working 170 register mapping.
+
+Live attempts on 2026-10-25 did not establish write support: all three
+hour/minute-sync requests stopped at the safe-bus-gap timeout before sending
+the minute command. The pump remained approximately 247 seconds fast. Thus
+the hour/minute write map is still inferred from older versions and tested
+with synthetic ACKs, not confirmed by a live write/readback pair on 170.
