@@ -5,6 +5,7 @@
 #include "comfortzone_decoder.h"
 
 #include "string.h"
+#include <cstdio>
 
 static czdec::KNOWN_REGISTER kr_decoder[] =
 	{
@@ -80,6 +81,9 @@ static czdec::KNOWN_REGISTER kr_decoder[] =
 #endif
 
 #if HP_PROTOCOL == HP_PROTOCOL_1_7
+        { {1,2,3,4,0x0b,0x08,0x00,0x73,0x03}, czcraft::KR_HOT_WATER_TEMP, "Hot water user setting", czdec::cmd_r_generic, czdec::cmd_w_temp, czdec::reply_r_temp, czdec::reply_w_generic},
+        { {1,2,3,4,0x0b,0x08,0x00,0xa5,0x02}, czcraft::KR_HEATING_CURVE, "Heating curve", czdec::cmd_r_generic, czdec::cmd_w_digit, czdec::reply_r_digit, czdec::reply_w_generic},
+
 		// don't know why but extra hot water off does not use the same message as extra hot water on
 		// 656fde02d35e414444521857010203040b08411700feffa1
 		{ {0x01, 0x02, 0x03, 0x04, 0x0B, 0x08, 0x41, 0x17, 0x00}, czcraft::KR_EXTRA_HOT_WATER_OFF, "Extra hot water - off", czdec::cmd_r_generic, czdec::cmd_w_extra_hot_water, czdec::reply_r_extra_hot_water, czdec::reply_w_generic},
@@ -102,7 +106,8 @@ static czdec::KNOWN_REGISTER kr_decoder[] =
 		// Extra short/unknown registers observed in data dumps — log raw payload for analysis
 		{ {0x01, 0x02, 0x03, 0x04, 0x0B, 0x08, 0x00, 0x9E, 0x04}, czcraft::KR_UNCRAFTABLE, "Status (00 9E 04)", czdec::cmd_r_generic, czdec::empty, czdec::reply_r_log_raw, czdec::reply_w_generic},
 		{ {0x01, 0x02, 0x03, 0x04, 0x0B, 0x08, 0x01, 0x45, 0x01}, czcraft::KR_UNCRAFTABLE, "Event (01 45 01)", czdec::cmd_r_generic, czdec::empty, czdec::reply_r_log_raw, czdec::reply_w_generic},
-		{ {0x01, 0x02, 0x03, 0x04, 0x0B, 0x08, 0x05, 0x2C, 0x00}, czcraft::KR_UNCRAFTABLE, "Status (05 2C 00)", czdec::cmd_r_generic, czdec::empty, czdec::reply_r_log_raw, czdec::reply_w_generic},
+		{ {0x01, 0x02, 0x03, 0x04, 0x0B, 0x08, 0x05, 0x2C, 0x00}, czcraft::KR_UNCRAFTABLE, "Protocol 170 energy/runtime counters", czdec::cmd_r_generic, czdec::empty, czdec::reply_r_v170_counters, czdec::reply_w_generic},
+		{ {0x01, 0x02, 0x03, 0x04, 0x0B, 0x08, 0x01, 0x04, 0x00}, czcraft::KR_UNCRAFTABLE, "Protocol 170 frequent temperatures", czdec::cmd_r_generic, czdec::empty, czdec::reply_r_v170_temperatures, czdec::reply_w_generic},
 		//{ {0x01, 0x02, 0x03, 0x04, 0x0B, 0x08, 0x00, 0x05, 0x04}, czcraft::KR_UNCRAFTABLE, "Fan boost increase", czdec::cmd_r_generic, czdec::cmd_w_percentage, czdec::reply_r_percentage, czdec::reply_w_generic},
 		//{ {0x01, 0x02, 0x03, 0x04, 0x0B, 0x08, 0x00, 0x0E, 0x00}, czcraft::KR_UNCRAFTABLE, "Sanitary priority (get)", czdec::cmd_r_generic, czdec::empty, czdec::reply_r_sanitary_priority, czdec::empty},
 		
@@ -200,7 +205,7 @@ static czdec::KNOWN_REGISTER kr_decoder[] =
 		//65  68  68  82  07  138 101 111 222 02  86  114 01  02  03  04  11  08  05  00  00    89  49  25  07  37  17  35  00  00  00  00  00  48  48  48  48  19  71  00  00  177 34  00  00  249 20  00  00  65  09  00  00  00  00  00  00  00  00  00  00  00  00  00  00  51  143 76  00  61  34  07  00  127 64  12  00  131 198 16  00  234 26  49  00  160
 		//A   D   D   R   .   .   e   o   .   .   V   r   .   .   .   .   .   .   .   .   .     Y   1   .   .   %   .   #   .   .   .   .   .   0   0   0   0   .   G   .   .   .   "   .   .   .   .   .   .   A   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   3   .   L   .   =   "   .   .   .   @   .   .   .   .   .   .   .   .   1   .   .
 		{ {0x01, 0x02, 0x03, 0x04, 0x0B, 0x08, 0x05, 0x00, 0x00}, czcraft::KR_UNCRAFTABLE, "Status 08", czdec::cmd_r_generic, czdec::empty, czdec::reply_r_status_08, czdec::reply_w_generic},	// 0x50 bytes
-		{ {0x01, 0x02, 0x03, 0x04, 0x0B, 0x08, 0x00, 0x20, 0x03}, czcraft::KR_UNCRAFTABLE, "Status (settings)", czdec::cmd_r_generic, czdec::empty, czdec::reply_r_status_v180_settings, czdec::reply_w_generic},
+		{ {0x01, 0x02, 0x03, 0x04, 0x0B, 0x08, 0x00, 0x20, 0x03}, czcraft::KR_UNCRAFTABLE, "Protocol 170 settings", czdec::cmd_r_generic, czdec::empty, czdec::reply_r_status_v170_settings, czdec::reply_w_generic},
     	
 		//Data: 656fde02d35e414444521857010203040b0881130000049c
     	//Data: 41444452078a656fde021777010203040b088113000434
@@ -1007,6 +1012,16 @@ czdec::KNOWN_REGISTER *czdec::kr_craft_name_to_index(czcraft::KNOWN_REGISTER_CRA
 // process a received frame and adjust comfortzone_status accordingly
 comfortzone_heatpump::PROCESSED_FRAME_TYPE czdec::process_frame(comfortzone_heatpump *cz_class, CZ_PACKET_HEADER *czph)
 {
+#if HP_PROTOCOL == HP_PROTOCOL_1_7
+    // A register names a byte range, not one fixed struct/packet length.
+    // Never decode another pump's replies into this pump's status.
+    if (czph->cmd == 'r') {
+        if (memcmp(czph->source, cz_class->heatpump_addr, 4) != 0)
+            return comfortzone_heatpump::PFT_UNKNOWN;
+        return decode_v170_ranges(cz_class, czph) ? comfortzone_heatpump::PFT_REPLY
+                                                : comfortzone_heatpump::PFT_UNKNOWN;
+    }
+#endif
 	int i = 0;
 
 	while(kr_decoder[i].reg_name != NULL)
@@ -1123,7 +1138,7 @@ void czdec::dump_frame(comfortzone_heatpump *cz_class, const char *prefix)
 void czdec::reply_r_log_raw(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_REPLY *p)
 {
 	int i;
-	int payload_start = sizeof(CZ_PACKET_HEADER) + 1; // skip header and wanted_reply_size byte
+	int payload_start = sizeof(CZ_PACKET_HEADER); // Replies start directly with data.
 	
 	// Build hex string for register number
 	char reg_hex[32];
@@ -1136,14 +1151,16 @@ void czdec::reply_r_log_raw(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_RE
 	}
 	
 	// Build hex string for payload
-	char payload_hex[256];
+	char payload_hex[256] = {};
 	char *payload_ptr = payload_hex;
 	int payload_len = czhp->cz_size - payload_start - 1; // -1 for trailing CRC
 	if(payload_len > 0)
 	{
 		for(i = payload_start; i < czhp->cz_size - 1; i++)
 		{
-			payload_ptr += sprintf(payload_ptr, "%02X ", czhp->cz_buf[i]);
+			const size_t remaining = sizeof(payload_hex) - (payload_ptr - payload_hex);
+			if (remaining < 4) break; // Two hex digits, space and terminating NUL.
+			payload_ptr += std::snprintf(payload_ptr, remaining, "%02X ", czhp->cz_buf[i]);
 		}
 	}
 	else
@@ -1151,5 +1168,5 @@ void czdec::reply_r_log_raw(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_RE
 		sprintf(payload_hex, "(empty)");
 	}
 	
-	DPRINT("[RESPONSE] %s - Reg: %s Payload: %s\n", kr->reg_name, reg_hex, payload_hex);
+	DPRINT("[RESPONSE] %s - Reg: %s Payload (%d bytes, bounded preview): %s\n", kr->reg_name, reg_hex, payload_len, payload_hex);
 }

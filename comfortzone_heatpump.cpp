@@ -10,6 +10,7 @@
 
 #include "string.h"
 #include "stdio.h"
+#include <cmath>
 
 void comfortzone_heatpump::begin() {
 	rs485->begin();
@@ -31,7 +32,10 @@ comfortzone_heatpump::PROCESSED_FRAME_TYPE comfortzone_heatpump::process()
 
 	while(rs485->available())
 	{
-		cz_buf[cz_size++] = rs485->read_byte();
+		const int received = rs485->read_byte();
+		if (received < 0) break;
+		cz_buf[cz_size++] = static_cast<byte>(received);
+		last_rx_byte_time_ = static_cast<uint32_t>(millis());
 
 		if(cz_size == sizeof(cz_buf))
 		{	// something goes wrong. packet size is store in a single byte, how can it goes above 255 ???
@@ -55,6 +59,7 @@ comfortzone_heatpump::PROCESSED_FRAME_TYPE comfortzone_heatpump::process()
 
 			if(
 				(czph->destination_crc == CRC8.maxim(czph->destination, 4))
+				&& (czph->packet_size > sizeof(CZ_PACKET_HEADER))
 				&& (czph->comp1_destination_crc == CRC8.maxim(comp1_dest, 4))
 				&& (
 						(czph->cmd == 'W') || (czph->cmd == 'R') || (czph->cmd == 'w') || (czph->cmd == 'r')
@@ -75,6 +80,34 @@ comfortzone_heatpump::PROCESSED_FRAME_TYPE comfortzone_heatpump::process()
 			break;
 	}
 
+	// Some adapters hold RX low between frames. ESP32 can report zero bytes
+	// during this break. Discard only a zero-only tail after a CRC-valid reply,
+	// and only when physical RX edge detection proves 100 ms without transitions.
+	// A partial real request, including any nonzero address byte, remains intact.
+	if (cz_size > 0 && bus_reply_seen_ && rs485->idle_break(100)) {
+		bool only_zeros = true;
+		for (uint16_t i = 0; i < cz_size; ++i) only_zeros &= cz_buf[i] == 0;
+		if (only_zeros) cz_size = 0;
+	}
+
+	// Bytes arrive less than 1 ms apart at 19200 baud. A partial frame with no
+	// new bytes for 100 ms cannot be completed reliably. In particular, idle
+	// zero-byte noise used to leave 20 bytes buffered forever and block writes.
+	if (cz_size > 0 && cz_size != cz_full_frame_size &&
+	    static_cast<uint32_t>(millis()) - last_rx_byte_time_ >= 100) {
+		bool invalid_prefix = false;
+		if (cz_size >= 6) {
+			byte inverted[4];
+			for (int i = 0; i < 4; ++i) inverted[i] = cz_buf[i] ^ 0xff;
+			invalid_prefix = cz_buf[4] != CRC8.maxim(cz_buf, 4) ||
+			                 cz_buf[5] != CRC8.maxim(inverted, 4);
+		}
+		// A possible truncated controller request invalidates the previous safe
+		// reply. Only a provably invalid address prefix may be discarded as noise.
+		if (!invalid_prefix) bus_reply_seen_ = false;
+		cz_size = 0;
+	}
+
 	// not enough data received to be a header
 	if(cz_size < sizeof(CZ_PACKET_HEADER))
 		return PFT_NONE;
@@ -91,7 +124,9 @@ comfortzone_heatpump::PROCESSED_FRAME_TYPE comfortzone_heatpump::process()
 	}
 
 	// check frame CRC (last byte of buffer is CRC
-	if(CRC8.maxim(cz_buf, cz_size - 1) == cz_buf[cz_size - 1])
+	const bool valid_crc = CRC8.maxim(cz_buf, cz_size - 1) == cz_buf[cz_size - 1];
+	observe_write_frame_(valid_crc);
+	if(valid_crc)
 	{
 		pft = czdec::process_frame(this, (CZ_PACKET_HEADER *)cz_buf);
 	}
@@ -169,6 +204,18 @@ void comfortzone_heatpump::set_grab_buffer(byte *buffer, uint16_t buffer_size, u
 #define RETURN_MESSAGE(msg)	{ strcpy(last_message, msg); last_message_size = strlen(last_message); }
 
 // fan speed: 1 = low, 2 = normal, 3 = fast, 4 = on timer (HP v1.8)
+bool comfortzone_heatpump::set_heating_curve(uint8_t curve, int timeout) {
+    if (curve > 10) { RETURN_MESSAGE("Heating curve must be 0..10"); return false; }
+    auto *kr = czdec::kr_craft_name_to_index(czcraft::KR_HEATING_CURVE);
+    if (!kr) { RETURN_MESSAGE("Heating curve is not mapped for this protocol"); return false; }
+    W_SMALL_CMD cmd; W_REPLY reply;
+    czcraft::craft_w_small_cmd(this, &cmd, kr->reg_num, curve);
+    czcraft::craft_w_reply(this, &reply, kr->reg_num, curve);
+    const bool ok = push_settings((byte*)&cmd, sizeof(cmd), (byte*)&reply, sizeof(reply), timeout);
+    if (ok && !staging_write_) comfortzone_status.heating_curve = curve;
+    return ok;
+}
+
 bool comfortzone_heatpump::set_fan_speed(uint8_t fan_speed, int timeout)
 {
 	W_SMALL_CMD cmd;
@@ -176,7 +223,7 @@ bool comfortzone_heatpump::set_fan_speed(uint8_t fan_speed, int timeout)
 	czdec::KNOWN_REGISTER *kr;
 	bool push_result;
 
-#if HP_PROTOCOL == HP_PROTOCOL_1_6
+#if HP_PROTOCOL == HP_PROTOCOL_1_6 || HP_PROTOCOL == HP_PROTOCOL_1_7 || HP_PROTOCOL == HP_PROTOCOL_2_21
 	if((fan_speed < 1) || (fan_speed > 3))
 	{
 		RETURN_MESSAGE("Invalid value, must be between 1 and 3");
@@ -205,7 +252,7 @@ bool comfortzone_heatpump::set_fan_speed(uint8_t fan_speed, int timeout)
 
 	push_result = push_settings((byte*)&cmd, sizeof(cmd), (byte*)&expected_reply, sizeof(expected_reply), timeout);
 
-	if(push_result == true)
+	if(push_result == true && !staging_write_)
 	{
 		// on success, immediatly update status cache. Without this, if status cache is sent to client
 		// before receiving update from heatpump, an incorrect value is returned
@@ -224,7 +271,7 @@ bool comfortzone_heatpump::set_room_temperature(float room_temp, int timeout)
 	uint16_t int_value;
 	bool push_result;
 
-	if((room_temp < 10.0) || (room_temp > 50.0))
+	if(!std::isfinite(room_temp) || (room_temp < 10.0) || (room_temp > 50.0))
 	{
 		RETURN_MESSAGE("Invalid value, must be between 10.0 and 50.0");
 		return false;
@@ -241,11 +288,17 @@ bool comfortzone_heatpump::set_room_temperature(float room_temp, int timeout)
 	int_value = (room_temp * 10.0 + 0.5);		// +0.5 to round to closest integer number
 
 	czcraft::craft_w_cmd(this, &cmd, kr->reg_num, int_value);
+	#if HP_PROTOCOL == HP_PROTOCOL_1_7
+	// Captured v1.70 panel writes: 25.0 -> 00, 26.0/27.0 -> 01,
+	// 24.0 -> 00. The acknowledgement echoes the final value byte.
+	czcraft::craft_w_reply(this, &expected_reply, kr->reg_num, int_value >> 8);
+	#else
 	czcraft::craft_w_reply(this, &expected_reply, kr->reg_num, 0);		// reply value is always 0 on success
+	#endif
 
 	push_result = push_settings((byte*)&cmd, sizeof(cmd), (byte*)&expected_reply, sizeof(expected_reply), timeout);
 
-	if(push_result == true)
+	if(push_result == true && !staging_write_)
 	{
 		// on success, immediatly update status cache. Without this, if status cache is sent to client
 		// before receiving update from heatpump, an incorrect value is returned
@@ -265,7 +318,7 @@ bool comfortzone_heatpump::set_hot_water_temperature(float hot_water_temp, int t
 	bool push_result;
 
 	// WARNING: technically, heatpump (or at least control panel) accepts 0.0° as minimum value but by security, I limit it to 10.0°
-	if((hot_water_temp < 10.0) || (hot_water_temp > 60.0))
+	if(!std::isfinite(hot_water_temp) || (hot_water_temp < 10.0) || (hot_water_temp > 60.0))
 	{
 		RETURN_MESSAGE("Invalid value, must be between 10.0 and 60.0");
 		return false;
@@ -275,18 +328,22 @@ bool comfortzone_heatpump::set_hot_water_temperature(float hot_water_temp, int t
 
 	if(kr == NULL)
 	{
-		RETURN_MESSAGE("czcraft::KR_ROOM_HEATING_TEMP not found");
+		RETURN_MESSAGE("Hot-water write register is not mapped for this protocol");
 		return false;
 	}
 
 	int_value = (hot_water_temp * 10.0 + 0.5);		// +0.5 to round to closest integer number
 
 	czcraft::craft_w_cmd(this, &cmd, kr->reg_num, int_value);
-	czcraft::craft_w_reply(this, &expected_reply, kr->reg_num, 1);		// reply value is always 1 on success
+	#if HP_PROTOCOL == HP_PROTOCOL_1_7
+	czcraft::craft_w_reply(this, &expected_reply, kr->reg_num, int_value >> 8);
+#else
+	czcraft::craft_w_reply(this, &expected_reply, kr->reg_num, 1);
+#endif		// reply value is always 1 on success
 
 	push_result = push_settings((byte*)&cmd, sizeof(cmd), (byte*)&expected_reply, sizeof(expected_reply), timeout);
 
-	if(push_result == true)
+	if(push_result == true && !staging_write_)
 	{
 		// on success, immediatly update status cache. Without this, if status cache is sent to client
 		// before receiving update from heatpump, an incorrect value is returned
@@ -323,7 +380,7 @@ bool comfortzone_heatpump::set_led_luminosity(uint8_t led_level, int timeout)
 
 	push_result = push_settings((byte*)&cmd, sizeof(cmd), (byte*)&expected_reply, sizeof(expected_reply), timeout);
 
-	if(push_result == true)
+	if(push_result == true && !staging_write_)
 	{
 		// on success, immediatly update status cache. Without this, if status cache is sent to client
 		// before receiving update from heatpump, an incorrect value is returned
@@ -360,7 +417,7 @@ bool comfortzone_heatpump::set_hour(uint8_t hour, int timeout)
 
 	push_result = push_settings((byte*)&cmd, sizeof(cmd), (byte*)&expected_reply, sizeof(expected_reply), timeout);
 
-	if(push_result == true)
+	if(push_result == true && !staging_write_)
 	{
 		// on success, immediatly update status cache. Without this, if status cache is sent to client
 		// before receiving update from heatpump, an incorrect value is returned
@@ -397,7 +454,7 @@ bool comfortzone_heatpump::set_minute(uint8_t minute, int timeout)
 
 	push_result = push_settings((byte*)&cmd, sizeof(cmd), (byte*)&expected_reply, sizeof(expected_reply), timeout);
 
-	if(push_result == true)
+	if(push_result == true && !staging_write_)
 	{
 		// on success, immediatly update status cache. Without this, if status cache is sent to client
 		// before receiving update from heatpump, an incorrect value is returned
@@ -434,7 +491,7 @@ bool comfortzone_heatpump::set_day(uint8_t day, int timeout)
 
 	push_result = push_settings((byte*)&cmd, sizeof(cmd), (byte*)&expected_reply, sizeof(expected_reply), timeout);
 
-	if(push_result == true)
+	if(push_result == true && !staging_write_)
 	{
 		// on success, immediatly update status cache. Without this, if status cache is sent to client
 		// before receiving update from heatpump, an incorrect value is returned
@@ -471,7 +528,7 @@ bool comfortzone_heatpump::set_month(uint8_t month, int timeout)
 
 	push_result = push_settings((byte*)&cmd, sizeof(cmd), (byte*)&expected_reply, sizeof(expected_reply), timeout);
 
-	if(push_result == true)
+	if(push_result == true && !staging_write_)
 	{
 		// on success, immediatly update status cache. Without this, if status cache is sent to client
 		// before receiving update from heatpump, an incorrect value is returned
@@ -510,11 +567,11 @@ bool comfortzone_heatpump::set_year(uint16_t year, int timeout)
 
 	push_result = push_settings((byte*)&cmd, sizeof(cmd), (byte*)&expected_reply, sizeof(expected_reply), timeout);
 
-	if(push_result == true)
+	if(push_result == true && !staging_write_)
 	{
 		// on success, immediatly update status cache. Without this, if status cache is sent to client
 		// before receiving update from heatpump, an incorrect value is returned
-		comfortzone_status.year = year;
+		comfortzone_status.year = 2000 + year;
 	}
 
 	return push_result;
@@ -555,7 +612,7 @@ bool comfortzone_heatpump::set_extra_hot_water(bool enable, int timeout)
 
 	push_result = push_settings((byte*)&cmd, sizeof(cmd), (byte*)&expected_reply, sizeof(expected_reply), timeout);
 
-	if(push_result == true)
+	if(push_result == true && !staging_write_)
 	{
 		// on success, immediatly update status cache. Without this, if status cache is sent to client
 		// before receiving update from heatpump, an incorrect value is returned
@@ -637,7 +694,7 @@ bool comfortzone_heatpump::set_automatic_daylight_saving(bool enable, int timeou
 
 	push_result = push_settings((byte*)&cmd, sizeof(cmd), (byte*)&expected_reply, sizeof(expected_reply), timeout);
 
-	if(push_result == true)
+	if(push_result == true && !staging_write_)
 	{
 		// on success, immediatly update status cache. Without this, if status cache is sent to client
 		// before receiving update from heatpump, an incorrect value is returned
@@ -701,7 +758,7 @@ bool comfortzone_heatpump::set_sensor_offset(uint16_t sensor_num, float temp_off
 
 	if(kr == NULL)
 	{
-		RETURN_MESSAGE("czcraft::KR_TEMP_OFFSET_SENSORx not found");
+		RETURN_MESSAGE("Sensor-offset write register is not mapped for this protocol");
 		return false;
 	}
 
@@ -712,7 +769,7 @@ bool comfortzone_heatpump::set_sensor_offset(uint16_t sensor_num, float temp_off
 
 	push_result = push_settings((byte*)&cmd, sizeof(cmd), (byte*)&expected_reply, sizeof(expected_reply), timeout);
 
-	if(push_result == true)
+	if(push_result == true && !staging_write_)
 	{
 		// on success, immediatly update status cache. Without this, if status cache is sent to client
 		// before receiving update from heatpump, an incorrect value is returned
@@ -728,6 +785,22 @@ bool comfortzone_heatpump::set_sensor_offset(uint16_t sensor_num, float temp_off
 // if reply_header_check_only is true, only reply header (CZ_PACKET_HEADER) must match expected_reply header
 bool comfortzone_heatpump::push_settings(byte *cmd, int cmd_length, byte *expected_reply, int expected_reply_length, int timeout, bool header_check_only)
 {
+	if (staging_write_) {
+		if (cmd_length > static_cast<int>(sizeof(write_command_)) ||
+		    expected_reply_length > static_cast<int>(sizeof(write_reply_))) {
+			RETURN_MESSAGE("Write frame too large");
+			return false;
+		}
+		memcpy(write_command_, cmd, cmd_length);
+		memcpy(write_reply_, expected_reply, expected_reply_length);
+		write_command_size_ = cmd_length;
+		write_reply_size_ = expected_reply_length;
+		write_header_only_ = header_check_only;
+		write_started_ = static_cast<uint32_t>(millis());
+		write_result_ = WriteResult::WAITING_FOR_BUS;
+		RETURN_MESSAGE("Waiting for a quiet bus after a pump reply");
+		return true;
+	}
 	unsigned long now;
 	unsigned long timeout_time;
 	unsigned long min_time_after_reply;
@@ -890,6 +963,12 @@ void comfortzone_heatpump::set_heatpump_addr(byte new_heatpump_addr[4])
 	heatpump_addr[1] = new_heatpump_addr[1];
 	heatpump_addr[2] = new_heatpump_addr[2];
 	heatpump_addr[3] = new_heatpump_addr[3];
+}
+
+void comfortzone_heatpump::set_controller_addr(const byte address[4])
+{
+	if (write_busy()) return;
+	memcpy(controller_addr, address, sizeof(controller_addr));
 }
 
 // try to guess heatpump address from query packet sent by control panel

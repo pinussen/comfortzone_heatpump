@@ -29,6 +29,7 @@ static void dump_unknown(const char *prefix, byte *start, int length)
 void czdec::reply_r_status_01(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_REPLY *p)
 {
 	R_REPLY_STATUS_01 *q = (R_REPLY_STATUS_01 *)p;
+	if (p->cz_head.packet_size < sizeof(*q)) return; // Never read beyond this reply.
 
 	czhp->comfortzone_status.fan_time_to_filter_change = get_uint16(q->fan_time_to_filter_change);
 
@@ -285,10 +286,12 @@ void czdec::reply_r_status_02(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_
 
 #if HP_PROTOCOL != HP_PROTOCOL_1_7
 	R_REPLY_STATUS_02 *q = (R_REPLY_STATUS_02 *)p;
+	if (p->cz_head.packet_size < sizeof(*q)) return; // Never read beyond this reply.
 #endif
 
 #if HP_PROTOCOL == HP_PROTOCOL_1_7
 	R_REPLY_STATUS_02_V170 *q = (R_REPLY_STATUS_02_V170 *)p;
+	if (p->cz_head.packet_size < sizeof(*q)) return; // Never read beyond this reply.
 #endif
 
 	uint16_t active_alarm;
@@ -696,6 +699,7 @@ void czdec::reply_r_status_03(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_
 {
 #ifdef DEBUG
 	R_REPLY_STATUS_03 *q = (R_REPLY_STATUS_03 *)p;
+	if (p->cz_head.packet_size < sizeof(*q)) return; // Never read beyond this reply.
 
 	//int reg_v;
 	//float reg_v_f;
@@ -714,6 +718,7 @@ void czdec::reply_r_status_04(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_
 {
 #ifdef DEBUG
 	R_REPLY_STATUS_04 *q = (R_REPLY_STATUS_04 *)p;
+	if (p->cz_head.packet_size < sizeof(*q)) return; // Never read beyond this reply.
 
 	int reg_v;
 	//float reg_v_f;
@@ -766,6 +771,8 @@ void czdec::reply_r_status_05(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_
 	int reg_v;
 
 	R_REPLY_STATUS_05 *q = (R_REPLY_STATUS_05 *)p;
+
+	if (p->cz_head.packet_size < sizeof(*q)) return; // Never read beyond this reply.
 
 #if HP_PROTOCOL == HP_PROTOCOL_1_6
 	if(q->hot_water_production == 0x00)
@@ -952,6 +959,7 @@ void czdec::reply_r_status_05(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_
 void czdec::reply_r_status_06(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_REPLY *p)
 {
 	R_REPLY_STATUS_06 *q = (R_REPLY_STATUS_06 *)p;
+	if (p->cz_head.packet_size < sizeof(*q)) return; // Never read beyond this reply.
 
 	czhp->comfortzone_status.heatpump_current_compressor_frequency = get_uint16(q->heatpump_current_compressor_frequency);
 
@@ -1219,6 +1227,7 @@ void czdec::reply_r_status_07(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_
 {
 #ifdef DEBUG
 	R_REPLY_STATUS_07 *q = (R_REPLY_STATUS_07 *)p;
+	if (p->cz_head.packet_size < sizeof(*q)) return; // Never read beyond this reply.
 
 	int reg_v;
 	//float reg_v_f;
@@ -1246,6 +1255,7 @@ void czdec::reply_r_status_07(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_
 void czdec::reply_r_status_08(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_REPLY *p)
 {
 	R_REPLY_STATUS_08 *q = (R_REPLY_STATUS_08 *)p;
+	if (p->cz_head.packet_size < sizeof(*q)) return; // Never read beyond this reply.
 
 	czhp->comfortzone_status.compressor_energy = get_uint32(q->compressor_energy);
 	czhp->comfortzone_status.add_energy = get_uint32(q->add_energy);
@@ -1371,6 +1381,8 @@ void czdec::reply_r_status_09(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_
 
 	R_REPLY_STATUS_09 *q = (R_REPLY_STATUS_09 *)p;
 
+	if (p->cz_head.packet_size < sizeof(*q)) return; // Never read beyond this reply.
+
 	reg_v = get_uint16(q->hotwater_priority);
 
 	if(reg_v == 0x4151)
@@ -1439,6 +1451,7 @@ void czdec::reply_r_status_10(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_
 {
 #ifdef DEBUG
 	R_REPLY_STATUS_10 *q = (R_REPLY_STATUS_10 *)p;
+	if (p->cz_head.packet_size < sizeof(*q)) return; // Never read beyond this reply.
 
 	int reg_v;
 	float reg_v_f;
@@ -1566,6 +1579,7 @@ void czdec::reply_r_status_10(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_
 void czdec::reply_r_status_11(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_REPLY *p)
 {
 	R_REPLY_STATUS_11 *q = (R_REPLY_STATUS_11 *)p;
+	if (p->cz_head.packet_size < sizeof(*q)) return; // Never read beyond this reply.
 
 	czhp->comfortzone_status.led_luminosity_setting = q->led_luminosity;
 
@@ -1614,6 +1628,7 @@ void czdec::reply_r_status_12(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_
 {
 #ifdef DEBUG
 	R_REPLY_STATUS_12 *q = (R_REPLY_STATUS_12 *)p;
+	if (p->cz_head.packet_size < sizeof(*q)) return; // Never read beyond this reply.
 
 	int reg_v;
 	float reg_v_f;
@@ -1680,6 +1695,7 @@ void czdec::reply_r_status_13(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_
 {
 #ifdef DEBUG
 	R_REPLY_STATUS_13 *q = (R_REPLY_STATUS_13 *)p;
+	if (p->cz_head.packet_size < sizeof(*q)) return; // Never read beyond this reply.
 
 	//int reg_v;
 	//float reg_v_f;
@@ -1699,6 +1715,7 @@ void czdec::reply_r_status_14(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_
 {
 #ifdef DEBUG
 	R_REPLY_STATUS_14 *q = (R_REPLY_STATUS_14 *)p;
+	if (p->cz_head.packet_size < sizeof(*q)) return; // Never read beyond this reply.
 
 	int reg_v;
 	//float reg_v_f;
@@ -1733,6 +1750,7 @@ void czdec::reply_r_status_15(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_
 {
 #ifdef DEBUG
 	R_REPLY_STATUS_15 *q = (R_REPLY_STATUS_15 *)p;
+	if (p->cz_head.packet_size < sizeof(*q)) return; // Never read beyond this reply.
 
 	//int reg_v;
 	//float reg_v_f;
@@ -1752,6 +1770,7 @@ void czdec::reply_r_status_16(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_
 {
 #ifdef DEBUG
 	R_REPLY_STATUS_16 *q = (R_REPLY_STATUS_16 *)p;
+	if (p->cz_head.packet_size < sizeof(*q)) return; // Never read beyond this reply.
 
 	//int reg_v;
 	//float reg_v_f;
@@ -1771,6 +1790,7 @@ void czdec::reply_r_status_17(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_
 {
 #ifdef DEBUG
 	R_REPLY_STATUS_17 *q = (R_REPLY_STATUS_17 *)p;
+	if (p->cz_head.packet_size < sizeof(*q)) return; // Never read beyond this reply.
 
 	//int reg_v;
 	//float reg_v_f;
@@ -1790,6 +1810,7 @@ void czdec::reply_r_status_18(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_
 {
 #ifdef DEBUG
 	R_REPLY_STATUS_18 *q = (R_REPLY_STATUS_18 *)p;
+	if (p->cz_head.packet_size < sizeof(*q)) return; // Never read beyond this reply.
 
 	//int reg_v;
 	//float reg_v_f;
@@ -1809,6 +1830,7 @@ void czdec::reply_r_status_19(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_
 {
 #ifdef DEBUG
 	R_REPLY_STATUS_19 *q = (R_REPLY_STATUS_19 *)p;
+	if (p->cz_head.packet_size < sizeof(*q)) return; // Never read beyond this reply.
 
 	//int reg_v;
 	//float reg_v_f;
@@ -1828,6 +1850,7 @@ void czdec::reply_r_status_20(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_
 {
 #ifdef DEBUG
 	R_REPLY_STATUS_20 *q = (R_REPLY_STATUS_20 *)p;
+	if (p->cz_head.packet_size < sizeof(*q)) return; // Never read beyond this reply.
 
 	//int reg_v;
 	//float reg_v_f;
@@ -1847,6 +1870,7 @@ void czdec::reply_r_status_22(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_
 {
 #ifdef DEBUG
 	R_REPLY_STATUS_22 *q = (R_REPLY_STATUS_22 *)p;
+	if (p->cz_head.packet_size < sizeof(*q)) return; // Never read beyond this reply.
 
 	//int reg_v;
 	//float reg_v_f;
@@ -1865,6 +1889,7 @@ void czdec::reply_r_status_23(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_
 {
 #ifdef DEBUG
 	R_REPLY_STATUS_23 *q = (R_REPLY_STATUS_23 *)p;
+	if (p->cz_head.packet_size < sizeof(*q)) return; // Never read beyond this reply.
 
 	int reg_v;
 	//float reg_v_f;
@@ -1937,6 +1962,7 @@ void czdec::reply_r_status_24(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_
 {
 #ifdef DEBUG
 	R_REPLY_STATUS_24 *q = (R_REPLY_STATUS_24 *)p;
+	if (p->cz_head.packet_size < sizeof(*q)) return; // Never read beyond this reply.
 
 	//int reg_v;
 	//float reg_v_f;
@@ -1955,6 +1981,7 @@ void czdec::reply_r_status_25(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_
 {
 #ifdef DEBUG
 	R_REPLY_STATUS_25 *q = (R_REPLY_STATUS_25 *)p;
+	if (p->cz_head.packet_size < sizeof(*q)) return; // Never read beyond this reply.
 
 	//int reg_v;
 	//float reg_v_f;
@@ -1974,6 +2001,7 @@ void czdec::reply_r_status_v180_x58(comfortzone_heatpump *czhp, KNOWN_REGISTER *
 {
 #ifdef DEBUG
 	R_REPLY_STATUS_V180_STATUS_x58 *q = (R_REPLY_STATUS_V180_STATUS_x58 *)p;
+	if (p->cz_head.packet_size < sizeof(*q)) return; // Never read beyond this reply.
 
 	dump_unknown("RAW R_REPLY_STATUS_V180_STATUS_x58", (byte *)q, sizeof(*q));
 	NPRINTLN("");
@@ -1996,6 +2024,7 @@ void czdec::reply_r_status_v180_x68(comfortzone_heatpump *czhp, KNOWN_REGISTER *
 {
 #ifdef DEBUG
 	R_REPLY_STATUS_V180_STATUS_x68 *q = (R_REPLY_STATUS_V180_STATUS_x68 *)p;
+	if (p->cz_head.packet_size < sizeof(*q)) return; // Never read beyond this reply.
 
 	dump_unknown("RAW R_REPLY_STATUS_V180_STATUS_x68", (byte *)q, sizeof(*q));
 	NPRINTLN("");
@@ -2033,6 +2062,7 @@ void czdec::reply_r_status_v180_x68(comfortzone_heatpump *czhp, KNOWN_REGISTER *
 void czdec::reply_r_status_v180_x40(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_REPLY *p)
 {
 	R_REPLY_STATUS_V180_STATUS_x40 *q = (R_REPLY_STATUS_V180_STATUS_x40 *)p;
+	if (p->cz_head.packet_size < sizeof(*q)) return; // Never read beyond this reply.
 
 	czhp->comfortzone_status.room_heating_setting = get_uint16(q->heating_calculated_setting);
 	czhp->comfortzone_status.calculated_flow_set = get_uint16(q->calculated_flow_set);
@@ -2092,6 +2122,7 @@ void czdec::reply_r_status_v180_x26(comfortzone_heatpump *czhp, KNOWN_REGISTER *
 {
 #ifdef DEBUG
 	R_REPLY_STATUS_V180_STATUS_x26 *q = (R_REPLY_STATUS_V180_STATUS_x26 *)p;
+	if (p->cz_head.packet_size < sizeof(*q)) return; // Never read beyond this reply.
 
 	//int reg_v;
 	//float reg_v_f;
@@ -2113,6 +2144,7 @@ void czdec::reply_r_status_v180_x26(comfortzone_heatpump *czhp, KNOWN_REGISTER *
 void czdec::reply_r_status_v180_x8d(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_REPLY *p)
 {
 	R_REPLY_STATUS_V180_STATUS_x8d *q = (R_REPLY_STATUS_V180_STATUS_x8d *)p;
+	if (p->cz_head.packet_size < sizeof(*q)) return; // Never read beyond this reply.
 
 	czhp->comfortzone_status.fan_time_to_filter_change = get_uint16(q->fan_time_to_filter_change);
 
@@ -2243,6 +2275,7 @@ void czdec::reply_r_status_v180_x8d(comfortzone_heatpump *czhp, KNOWN_REGISTER *
 void czdec::reply_r_status_v180_runtime_and_energy(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_REPLY *p)
 {
 	R_REPLY_STATUS_V180_STATUS_runtime_and_energy *q = (R_REPLY_STATUS_V180_STATUS_runtime_and_energy *)p;
+	if (p->cz_head.packet_size < sizeof(*q)) return; // Never read beyond this reply.
 
 	// update same informations as "Status 08" but it may be not here
 	czhp->comfortzone_status.compressor_energy = get_uint32(q->compressor_energy);
@@ -2331,6 +2364,7 @@ void czdec::reply_r_status_v180_xa1(comfortzone_heatpump *czhp, KNOWN_REGISTER *
 {
 #ifdef DEBUG
 	R_REPLY_STATUS_V180_STATUS_xa1 *q = (R_REPLY_STATUS_V180_STATUS_xa1 *)p;
+	if (p->cz_head.packet_size < sizeof(*q)) return; // Never read beyond this reply.
 
 	//int reg_v;
 	//float reg_v_f;
@@ -2351,6 +2385,7 @@ void czdec::reply_r_status_v180_xa1(comfortzone_heatpump *czhp, KNOWN_REGISTER *
 void czdec::reply_r_status_v180_02(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_REPLY *p)
 {
 	R_REPLY_STATUS_V180_02 *q = (R_REPLY_STATUS_V180_02 *)p;
+	if (p->cz_head.packet_size < sizeof(*q)) return; // Never read beyond this reply.
 	int reg_v;
 
 	reg_v = (q->heatpump_status[1] >> 4) & 0x07;
@@ -2449,6 +2484,7 @@ void czdec::reply_r_status_v180_xa3(comfortzone_heatpump *czhp, KNOWN_REGISTER *
 {
 #ifdef DEBUG
 	R_REPLY_STATUS_V180_STATUS_xa3 *q = (R_REPLY_STATUS_V180_STATUS_xa3 *)p;
+	if (p->cz_head.packet_size < sizeof(*q)) return; // Never read beyond this reply.
 
 	//int reg_v;
 	//float reg_v_f;
@@ -2469,6 +2505,7 @@ void czdec::reply_r_status_v180_xa3(comfortzone_heatpump *czhp, KNOWN_REGISTER *
 void czdec::reply_r_status_v180_xad(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_REPLY *p)
 {
 	R_REPLY_STATUS_V180_STATUS_xad *q = (R_REPLY_STATUS_V180_STATUS_xad *)p;
+	if (p->cz_head.packet_size < sizeof(*q)) return; // Never read beyond this reply.
 
 	int reg_v;
 	float reg_v_f;
@@ -2752,6 +2789,7 @@ void czdec::reply_r_status_v180_xc7(comfortzone_heatpump *czhp, KNOWN_REGISTER *
 {
 #ifdef DEBUG
 	R_REPLY_STATUS_V180_STATUS_xc7 *q = (R_REPLY_STATUS_V180_STATUS_xc7 *)p;
+	if (p->cz_head.packet_size < sizeof(*q)) return; // Never read beyond this reply.
 
 	//int reg_v;
 	//float reg_v_f;
@@ -2774,6 +2812,7 @@ void czdec::reply_r_status_v180_xc72(comfortzone_heatpump *czhp, KNOWN_REGISTER 
 {
 #ifdef DEBUG
 	R_REPLY_STATUS_V180_STATUS_xc72 *q = (R_REPLY_STATUS_V180_STATUS_xc72 *)p;
+	if (p->cz_head.packet_size < sizeof(*q)) return; // Never read beyond this reply.
 
 	//int reg_v;
 	//float reg_v_f;
@@ -2795,6 +2834,7 @@ void czdec::reply_r_status_v180_xc5(comfortzone_heatpump *czhp, KNOWN_REGISTER *
 {
 #ifdef DEBUG
 	R_REPLY_STATUS_V180_STATUS_xc5 *q = (R_REPLY_STATUS_V180_STATUS_xc5 *)p;
+	if (p->cz_head.packet_size < sizeof(*q)) return; // Never read beyond this reply.
 
 	//int reg_v;
 	//float reg_v_f;
@@ -2814,6 +2854,7 @@ void czdec::reply_r_status_v180_xbf(comfortzone_heatpump *czhp, KNOWN_REGISTER *
 {
 #ifdef DEBUG
 	R_REPLY_STATUS_V180_STATUS_xbf *q = (R_REPLY_STATUS_V180_STATUS_xbf *)p;
+	if (p->cz_head.packet_size < sizeof(*q)) return; // Never read beyond this reply.
 
 	//int reg_v;
 	//float reg_v_f;
@@ -2855,6 +2896,7 @@ void czdec::reply_r_status_v180_x6d(comfortzone_heatpump *czhp, KNOWN_REGISTER *
 {
 #ifdef DEBUG
 	R_REPLY_STATUS_V180_STATUS_x6d *q = (R_REPLY_STATUS_V180_STATUS_x6d *)p;
+	if (p->cz_head.packet_size < sizeof(*q)) return; // Never read beyond this reply.
 
 	//int reg_v;
 	//float reg_v_f;
@@ -2876,6 +2918,7 @@ void czdec::reply_r_status_v180_x6d(comfortzone_heatpump *czhp, KNOWN_REGISTER *
 void czdec::reply_r_status_v180_x56(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_REPLY *p)
 {
 	R_REPLY_STATUS_V180_STATUS_x56 *q = (R_REPLY_STATUS_V180_STATUS_x56 *)p;
+	if (p->cz_head.packet_size < sizeof(*q)) return; // Never read beyond this reply.
 
 #ifdef DEBUG
 
@@ -2940,6 +2983,7 @@ void czdec::reply_r_status_v180_short2(comfortzone_heatpump *czhp, KNOWN_REGISTE
 {
 #ifdef DEBUG
 	R_REPLY_STATUS_V180_STATUS_SHORT2 *q = (R_REPLY_STATUS_V180_STATUS_SHORT2 *)p;
+	if (p->cz_head.packet_size < sizeof(*q)) return; // Never read beyond this reply.
 
 	//int reg_v;
 	//float reg_v_f;
@@ -2962,6 +3006,7 @@ void czdec::reply_r_status_v180_ui_versions(comfortzone_heatpump *czhp, KNOWN_RE
 {
 #ifdef DEBUG
 	R_REPLY_STATUS_V180_STATUS_ui_versions *q = (R_REPLY_STATUS_V180_STATUS_ui_versions *)p;
+	if (p->cz_head.packet_size < sizeof(*q)) return; // Never read beyond this reply.
 
 	//int reg_v;
 	//float reg_v_f;
@@ -2998,6 +3043,7 @@ void czdec::reply_r_status_v180_x2c(comfortzone_heatpump *czhp, KNOWN_REGISTER *
 {
 #ifdef DEBUG
 	R_REPLY_STATUS_V180_STATUS_x2c *q = (R_REPLY_STATUS_V180_STATUS_x2c *)p;
+	if (p->cz_head.packet_size < sizeof(*q)) return; // Never read beyond this reply.
 
 	//int reg_v;
 	//float reg_v_f;
@@ -3018,7 +3064,9 @@ void czdec::reply_r_status_v180_x2c(comfortzone_heatpump *czhp, KNOWN_REGISTER *
 
 void czdec::reply_r_status_v180_settings(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_REPLY *p)
 {
+    if (p->cz_head.packet_size != sizeof(R_REPLY_STATUS_V180_SETTINGS)) return;
 	R_REPLY_STATUS_V180_SETTINGS *q = (R_REPLY_STATUS_V180_SETTINGS *)p;
+	if (p->cz_head.packet_size < sizeof(*q)) return; // Never read beyond this reply.
 
 	czhp->comfortzone_status.hot_water_setting = get_uint16(q->hot_water_user_setting);
 
@@ -3056,6 +3104,7 @@ void czdec::reply_r_status_v180_settings(comfortzone_heatpump *czhp, KNOWN_REGIS
 void czdec::reply_r_status_v180_c8a(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_REPLY *p)
 {
 	R_REPLY_STATUS_V180_C8A *q = (R_REPLY_STATUS_V180_C8A *)p;
+	if (p->cz_head.packet_size < sizeof(*q)) return; // Never read beyond this reply.
 
 	czhp->comfortzone_status.fan_speed_duty = get_uint16(q->fan_speed_duty);
 
@@ -3092,6 +3141,7 @@ void czdec::reply_r_status_v180_c8a(comfortzone_heatpump *czhp, KNOWN_REGISTER *
 void czdec::reply_r_status_v221_xc1(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_REPLY *p)
 {
 	R_REPLY_STATUS_V221_xC1 *q = (R_REPLY_STATUS_V221_xC1 *)p;
+	if (p->cz_head.packet_size < sizeof(*q)) return; // Never read beyond this reply.
 
 	czhp->comfortzone_status.room_heating_setting = get_uint16(q->heating_calculated_setting);
 
@@ -3129,6 +3179,7 @@ void czdec::reply_r_status_v221_xc1(comfortzone_heatpump *czhp, KNOWN_REGISTER *
 void czdec::reply_r_status_v221_x51(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_REPLY *p)
 {
 	R_REPLY_STATUS_V221_x51 *q = (R_REPLY_STATUS_V221_x51 *)p;
+	if (p->cz_head.packet_size < sizeof(*q)) return; // Never read beyond this reply.
 
 	czhp->comfortzone_status.fan_speed = q->fan_speed;
 
@@ -3269,6 +3320,7 @@ void czdec::reply_r_status_v221_x51(comfortzone_heatpump *czhp, KNOWN_REGISTER *
 void czdec::reply_r_status_v221_x88(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_REPLY *p)
 {
 	R_REPLY_STATUS_V221_x88 *q = (R_REPLY_STATUS_V221_x88 *)p;
+	if (p->cz_head.packet_size < sizeof(*q)) return; // Never read beyond this reply.
 
 	czhp->comfortzone_status.hour = q->hour1;
 	czhp->comfortzone_status.minute = q->minute1;
@@ -3434,6 +3486,7 @@ void czdec::reply_r_temp_or_r_status_v221_xc5(comfortzone_heatpump *czhp, KNOWN_
 	else if(p->cz_head.packet_size == 0xc5)	// reply of a read command with parameter = 0xAF
 	{
 		R_REPLY_STATUS_V221_xc5 *q = (R_REPLY_STATUS_V221_xc5 *)p;
+		if (p->cz_head.packet_size < sizeof(*q)) return; // Never read beyond this reply.
 
 		czhp->comfortzone_status.hot_water_calculated_setting = get_uint16(q->hot_water_calculated_setting);
 
@@ -3476,6 +3529,7 @@ void czdec::reply_r_temp_or_r_status_v221_xc5(comfortzone_heatpump *czhp, KNOWN_
 void czdec::reply_r_status_v221_xf2(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_REPLY *p)
 {
 	R_REPLY_STATUS_V221_xf2 *q = (R_REPLY_STATUS_V221_xf2 *)p;
+	if (p->cz_head.packet_size < sizeof(*q)) return; // Never read beyond this reply.
 
 	czhp->comfortzone_status.fan_time_to_filter_change = get_uint16(q->fan_time_to_filter_change);
 
@@ -3510,6 +3564,7 @@ void czdec::reply_r_status_v221_xf2(comfortzone_heatpump *czhp, KNOWN_REGISTER *
 void czdec::reply_r_status_v221_xb9(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_REPLY *p)
 {
 	R_REPLY_STATUS_V221_xb9 *q = (R_REPLY_STATUS_V221_xb9 *)p;
+	if (p->cz_head.packet_size < sizeof(*q)) return; // Never read beyond this reply.
 
 	czhp->comfortzone_status.heatpump_current_compressor_power = get_uint16(q->heatpump_current_compressor_power);
 	czhp->comfortzone_status.heatpump_current_add_power = get_uint32(q->heatpump_current_add_power);
@@ -3575,318 +3630,75 @@ void czdec::reply_r_status_v221_xb9(comfortzone_heatpump *czhp, KNOWN_REGISTER *
 // Version 1.7
 // -----------------------------
 
+void czdec::reply_r_v170_temperatures(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_REPLY *p)
+{
+    // Bank 01 is byte-addressed: the 96-byte read at 0x0004 overlaps
+    // the 178-byte read at 0x0000. TE0 starts at absolute address 0x0032,
+    // so its offset here is 46 rather than 50. TE24 occupies the last two
+    // data bytes. Do not cast this shorter message to the full status struct.
+    if (p->cz_head.packet_size != 118) return;
+    byte *data = reinterpret_cast<byte *>(p) + sizeof(CZ_PACKET_HEADER);
+    auto &s = czhp->comfortzone_status;
+    s.sensors_te0_outdoor_temp = get_int16(data + 46);
+    s.sensors_te1_flow_water = get_int16(data + 48);
+    s.sensors_te2_return_water = get_int16(data + 50);
+    s.sensors_te3_indoor_temp = get_int16(data + 52);
+    s.sensors_te4_hot_gas_temp = get_int16(data + 54);
+    s.sensors_te5_exchanger_out = get_int16(data + 56);
+    s.sensors_te6_evaporator_in = get_int16(data + 58);
+    s.sensors_te7_exhaust_air = get_int16(data + 60);
+    s.sensors_te24_hot_water_temp = get_int16(data + 94);
+}
+
+void czdec::reply_r_v170_counters(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_REPLY *p)
+{
+    // Bank 05, address 0x002c: exact 20-byte suffix of the full 0x0000
+    // energy/runtime block. Values and units match reply_r_status_08.
+    if (p->cz_head.packet_size != 42) return;
+    byte *data = reinterpret_cast<byte *>(p) + sizeof(CZ_PACKET_HEADER);
+    auto &s = czhp->comfortzone_status;
+    s.compressor_energy = get_uint32(data);
+    s.add_energy = get_uint32(data + 4);
+    s.hot_water_energy = get_uint32(data + 8);
+    s.compressor_runtime = get_uint32(data + 12);
+    s.total_runtime = get_uint32(data + 16);
+}
+
+void czdec::reply_r_status_v170_settings(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_REPLY *p)
+{
+    if (p->cz_head.packet_size != sizeof(R_REPLY_STATUS_V170_SETTINGS)) return;
+    auto *q = reinterpret_cast<R_REPLY_STATUS_V170_SETTINGS *>(p);
+    const uint16_t value = get_uint16(q->hot_water_user_setting);
+    // Reject sentinels/corrupt interpretations instead of publishing absurd targets.
+    if (value <= 1000) czhp->comfortzone_status.hot_water_setting = value;
+}
+
 void czdec::reply_r_status_v170_x79(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_REPLY *p)
 {
-	R_REPLY_STATUS_V170_X79 *q = (R_REPLY_STATUS_V170_X79 *)p;
-
-	czhp->comfortzone_status.fan_time_to_filter_change = get_uint16(q->fan_time_to_filter_change);
-
-	czhp->comfortzone_status.hot_water_setting = get_uint16(q->hot_water_extra_setting);
+    if (p->cz_head.packet_size != sizeof(R_REPLY_STATUS_V170_X79)) return;
+    auto *q = reinterpret_cast<R_REPLY_STATUS_V170_X79 *>(p);
+    czhp->comfortzone_status.fan_time_to_filter_change = get_uint16(q->fan_time_to_filter_change);
+    // The extra-hot-water setting is not the normal user target. Do not
+    // publish it as hot_water_setting; register 00 20 03 supplies the normal target.
 #ifdef DEBUG
-	int reg_v;
-	float reg_v_f;
-	int i;
-
-	// ===
-	dump_unknown("unknown_s01", q->unknown, sizeof(q->unknown));
-
-	// ===
-	reg_v = q->extra_hot_water;
-
-	NPRINT("Extra hot water: ");
-	if(reg_v == 0xFF)
-		NPRINT("off");
-	else
-		NPRINT("on - ");			// 0xFF = off mais on = 0x02 ou autre chose
-		NPRINT(reg_v, HEX);
-	NPRINTLN("");
-
-	// ===
-	reg_v = get_uint16(q->hot_water_extra_setting);
-
-	reg_v_f = reg_v;
-	reg_v_f /= 10.0;
-
-	NPRINT("Hot water User setting: ");
-	NPRINT(reg_v_f);
-	NPRINTLN("°C");
-
-	// ===
-	reg_v = get_uint16(q->hot_water_hysteresis);
-
-	reg_v_f = reg_v;
-	reg_v_f /= 10.0;
-
-	NPRINT("Hot water - hysteresis: ");
-	NPRINT(reg_v_f);
-	NPRINTLN("°C");
-
-	// ===
-	for(i = 0; i < STATUS_01_NB_HW_NORMAL_STEPS; i++)
-	{
-		reg_v = get_int16(q->hot_water_normal_steps[i]);
-
-		reg_v_f = reg_v;
-		reg_v_f /= 10.0;
-
-		NPRINT("Hot water - Normal step ");
-		NPRINT(i);
-		NPRINT(": ");
-		NPRINT(reg_v_f);
-		NPRINTLN("°C");
-	}
-
-	// ===
-	for(i = 0; i < STATUS_01_NB_HW_HIGH_STEPS; i++)
-	{
-		reg_v = get_int16(q->hot_water_high_steps[i]);
-
-		reg_v_f = reg_v;
-		reg_v_f /= 10.0;
-
-		NPRINT("Hot water - High step ");
-		NPRINT(i);
-		NPRINT(": ");
-		NPRINT(reg_v_f);
-		NPRINTLN("°C");
-	}
-	
-	// ===
-	for(i = 0; i < STATUS_01_NB_HW_EXTRA_STEPS; i++)
-	{
-		reg_v = get_int16(q->hot_water_extra_steps[i]);
-
-		reg_v_f = reg_v;
-		reg_v_f /= 10.0;
-
-		NPRINT("Hot water - Additional step ");
-		NPRINT(i);
-		NPRINT(": ");
-		NPRINT(reg_v_f);
-		NPRINTLN("°C");
-	}
-	
-	// ===
-	dump_unknown("unknown_s01_5a", q->unknown5a, sizeof(q->unknown5a));
-
-	// ===
-	reg_v = q->hot_water_max_runtime;
-
-	NPRINT("Hot water max runtime: ");
-	NPRINT(reg_v);
-	NPRINTLN("min");
-
-	// ===
-	reg_v = q->hot_water_pause_time;
-
-	NPRINT("Hot water pause duration: ");
-	NPRINT(reg_v);
-	NPRINTLN("min");
-	
-	// ===
-	for(i = 0; i < 8; i++)
-	{
-		reg_v = get_int16(q->unknown5b[i]);
-
-		reg_v_f = reg_v;
-
-		NPRINT("unknown_s01_5b[");
-		NPRINT(i);
-		NPRINT("]: ");
-		NPRINT(reg_v_f);
-		NPRINTLN("?");
-	}
-
-
-	// ===
-	reg_v = get_uint16(q->hot_water_compressor_min_frequency);
-
-	reg_v_f = reg_v;
-	reg_v_f /= 10.0;
-
-	NPRINT("Hot water - compressor min freq.: ");
-	NPRINT(reg_v_f);
-	NPRINTLN("Hz");
-
-	// ===
-	reg_v = get_uint16(q->hot_water_compressor_max_frequency);
-
-	reg_v_f = reg_v;
-	reg_v_f /= 10.0;
-
-	NPRINT("Hot water - compressor max freq.: ");
-	NPRINT(reg_v_f);
-	NPRINTLN("Hz");
-	
-	// ===
-	dump_unknown("unknown_s01_6", q->unknown6, sizeof(q->unknown6));
-
-	// ===
-	reg_v = get_uint16(q->hot_water_extra_setting);
-
-	reg_v_f = reg_v;
-	reg_v_f /= 10.0;
-
-	NPRINT("Hot water - extra setting: ");
-	NPRINT(reg_v_f);
-	NPRINTLN("°C");
-
-	// ===
-	reg_v = get_uint16(q->hot_water_extra_time);
-
-	NPRINT("Hot water - extra time: ");
-	NPRINT(reg_v);
-	NPRINTLN("min");
-
-	// ===
-	dump_unknown("unknown_s01_7", q->unknown7, sizeof(q->unknown7));
-
-	// ===
-	reg_v = get_uint16(q->normal_fan_speed);
-
-	reg_v_f = reg_v;
-	reg_v_f /= 10.0;
-
-	NPRINT("Normal fan speed: ");
-	NPRINT(reg_v_f);
-	NPRINTLN("%");
-
-	// ===
-	reg_v = get_int16(q->reduce_fan_speed);
-
-	reg_v_f = reg_v;
-	reg_v_f /= 10.0;
-
-	NPRINT("Reduce fan speed: ");
-	NPRINT(reg_v_f);
-	NPRINTLN("%");
-
-	// ===
-	reg_v = get_int16(q->fan_boost_increase);
-
-	reg_v_f = reg_v;
-	reg_v_f /= 10.0;
-
-	NPRINT("Fan boost increase: ");
-	NPRINT(reg_v_f);
-	NPRINTLN("%");
-
-	// ===
-	dump_unknown("unknown_s01_8", q->unknown8, sizeof(q->unknown8));
-
-	// ===
-	reg_v = get_int16(q->supply_fan_t12_adjust);
-
-	reg_v_f = reg_v;
-	reg_v_f /= 10.0;
-
-	NPRINT("Supply fan T12 adjust: ");
-	NPRINT(reg_v_f);
-	NPRINTLN("%");
-
-	// ===
-	dump_unknown("unknown_s01_8a", q->unknown8a, sizeof(q->unknown8a));
-
-	// ===
-	reg_v = get_uint16(q->fan_time_to_filter_change);
-
-	NPRINT("Fan - Time to filter change: ");
-	NPRINT(reg_v);
-	NPRINTLN("d");
-
-	// ===
-	dump_unknown("unknown_s01_9", q->unknown9, sizeof(q->unknown9));
-
-	// ===
-	reg_v = get_uint16(q->heating_compressor_min_frequency);
-
-	reg_v_f = reg_v;
-	reg_v_f /= 10.0;
-
-	NPRINT("Heating compressor min freq.: ");
-	NPRINT(reg_v_f);
-	NPRINTLN("Hz");
-
-	// ===
-	reg_v = get_uint16(q->heating_compressor_max_frequency);
-
-	reg_v_f = reg_v;
-	reg_v_f /= 10.0;
-
-	NPRINT("Heating compressor max freq.: ");
-	NPRINT(reg_v_f);
-	NPRINTLN("Hz");
-
-	// ===
-	dump_unknown("unknown_s01_9a", q->unknown9a, sizeof(q->unknown9a));
-
-	NPRINT("crc: ");
-	if(q->crc < 0x10)
-		NPRINT("0");
-	NPRINTLN(q->crc, HEX);
+    dump_unknown("Protocol 170 settings", reinterpret_cast<byte *>(q), sizeof(*q));
 #endif
 }
 
-void czdec::reply_r_status_v170_status_2d(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_REPLY *p) 
+void czdec::reply_r_status_v170_status_2d(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_REPLY *p)
 {
-	R_REPLY_STATUS_V170_STATUS_2D *q = (R_REPLY_STATUS_V170_STATUS_2D *)p;
-
-	czhp->comfortzone_status.room_heating_setting = get_uint16(q->heating_calculated_setting);
-	
+    if (p->cz_head.packet_size != sizeof(R_REPLY_STATUS_V170_STATUS_2D)) return;
+    auto *q = reinterpret_cast<R_REPLY_STATUS_V170_STATUS_2D *>(p);
+    czhp->comfortzone_status.room_heating_setting = get_uint16(q->heating_calculated_setting);
 #ifdef DEBUG
-	int reg_v;
-	float reg_v_f;
-	int i;
-
-	dump_unknown("RAW R_REPLY_STATUS_V170_STATUS_2D", (byte *)q, sizeof(*q));
-	NPRINTLN("");
-
-	// ===
-	reg_v = get_uint16(q->calculated_flow_set);
-
-	reg_v_f = reg_v;
-	reg_v_f /= 10.0;
-
-	NPRINT("Calculated flow set: ");
-	NPRINT(reg_v_f);
-	NPRINTLN("°C");
-
-	for(i = 0; i < STATUS_V180_x40_NB_TEMP; i++)
-	{
-		reg_v = get_int16(q->temp[i]);
-
-		reg_v_f = reg_v;
-		reg_v_f /= 10.0;
-
-		NPRINT("x40 ?Temp #");
-		NPRINT(i);
-		NPRINT(": ");
-		NPRINT(reg_v_f);
-		NPRINT("°C");
-		NPRINT(" ");
-		dump_unknown("", q->temp[i], 2);
-	}
-
-	// ===
-	reg_v = get_uint16(q->heating_calculated_setting);
-
-	reg_v_f = reg_v;
-	reg_v_f /= 10.0;
-
-	NPRINT("Heating - Calculated setting: ");
-	NPRINT(reg_v_f);
-	NPRINTLN("°C");
-
-	NPRINT("crc: ");
-	if(q->crc < 0x10)
-		NPRINT("0");
-	NPRINTLN(q->crc, HEX);
+    dump_unknown("Protocol 170 heating settings", reinterpret_cast<byte *>(q), sizeof(*q));
 #endif
 }
 
 void czdec::reply_r_status_06_v170(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_REPLY *p)
 {
 	R_REPLY_STATUS_06_V170 *q = (R_REPLY_STATUS_06_V170 *)p;
+	if (p->cz_head.packet_size < sizeof(*q)) return; // Never read beyond this reply.
 
 	czhp->comfortzone_status.heatpump_current_compressor_frequency = get_uint16(q->heatpump_current_compressor_frequency);
 	czhp->comfortzone_status.heatpump_current_compressor_power = get_uint16(q->heatpump_current_compressor_power);

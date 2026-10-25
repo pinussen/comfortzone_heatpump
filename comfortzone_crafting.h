@@ -10,7 +10,8 @@ class czcraft
 	// list of craftable command packets
 	typedef enum known_register_craft_name
 	{
-		KR_UNCRAFTABLE = 0,		// uncraftable packet
+		KR_UNCRAFTABLE = 0,
+        KR_HEATING_CURVE,		// uncraftable packet
 		KR_FAN_SPEED,				// set fan speed, parameter => 1=slow, 2=normal, 3=fast
 		KR_LED_LUMINOSITY,		// set led luminosity, parameter => 0=off to 6=full power
 		KR_ROOM_HEATING_TEMP,	// set room heating temperature, parameter => 120 (=12.0°) to 240 (=24.0°)

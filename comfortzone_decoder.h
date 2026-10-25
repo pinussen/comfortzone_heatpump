@@ -22,6 +22,7 @@ class czdec
 	} KNOWN_REGISTER;
 
 	static comfortzone_heatpump::PROCESSED_FRAME_TYPE process_frame(comfortzone_heatpump *cz_class, CZ_PACKET_HEADER *czph);
+	static bool decode_v170_ranges(comfortzone_heatpump *hp, CZ_PACKET_HEADER *frame);
 	static void dump_frame(comfortzone_heatpump *cz_class, const char *prefix);
 	static czdec::KNOWN_REGISTER *kr_craft_name_to_index(czcraft::KNOWN_REGISTER_CRAFT_NAME reg_cname);
 	static czdec::KNOWN_REGISTER* get_decoder_for_frame(CZ_PACKET_HEADER *czph);
@@ -60,6 +61,8 @@ class czdec
 	static void reply_r_fan_speed(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_REPLY *p);
 	// debug: log raw payload for unknown short registers
 	static void reply_r_log_raw(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_REPLY *p);
+	static void reply_r_v170_temperatures(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_REPLY *p);
+	static void reply_r_v170_counters(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_REPLY *p);
 	static void reply_r_language(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_REPLY *p);
 	static void reply_r_digit(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_REPLY *p);
 	static void reply_r_clr_alarm(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_REPLY *p);
@@ -99,6 +102,7 @@ class czdec
 	static void reply_r_status_25(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_REPLY *p);
 
 	// protocol version 1.70
+	static void reply_r_status_v170_settings(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_REPLY *p);
 	static void reply_r_status_v170_x79(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_REPLY *p);
 	static void reply_r_status_v170_status_2d(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_REPLY *p);
 	static void reply_r_status_06_v170(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_REPLY *p);

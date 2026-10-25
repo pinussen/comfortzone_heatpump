@@ -37,18 +37,22 @@ public:
 
 	Subscribable<T>& operator=(const T& value) {
 		_value = value;
+		_valid = true;
 		if (_on_change != NULL) {
 			_on_change(_value, _context);
 		}
 		return *this;
 	}
 
+	bool has_value() const { return _valid; }
+
 	operator T() const {
 		return _value;
 	}
 
 private:
-	T _value;
+	T _value{};
+	bool _valid = false;
 	callback_t _on_change = NULL;
 	void *_context = NULL;
 };
@@ -58,6 +62,18 @@ private:
 // Supported protocols are 1.60, 1.80, 2.21. If no protocol version is specified, only 1.60 is supported
 typedef struct
 {
+	Subscribable<int16_t> sensors_te10_temp;
+	Subscribable<int16_t> heating_curve;
+	Subscribable<int16_t> hot_water_max_runtime;
+	Subscribable<int16_t> hot_water_pause_time;
+	Subscribable<int16_t> hot_water_extra_setting;
+	Subscribable<int16_t> hot_water_extra_time;
+	Subscribable<int16_t> normal_fan_speed;
+	Subscribable<int16_t> hot_water_compressor_min_frequency;
+	Subscribable<int16_t> hot_water_compressor_max_frequency;
+	Subscribable<uint16_t> pending_alarm_mask;
+	Subscribable<uint16_t> acknowledged_alarm_mask;
+
 	Subscribable<uint16_t> fan_time_to_filter_change;		// days (proto: 1.60, 1.80, 2.21)
 
 	Subscribable<bool> filter_alarm;								// true = replace/clean filter alarm, false = filter ok (proto: 1.60, 1.80)

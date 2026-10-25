@@ -1160,7 +1160,7 @@ typedef struct __attribute__ ((packed))
 typedef struct __attribute__ ((packed))
 {
 	CZ_PACKET_HEADER cz_head;
-		
+
 	byte hot_water_max_runtime;						// minute
 	byte hot_water_pause_time;						// minute
 
@@ -1189,6 +1189,19 @@ typedef struct __attribute__ ((packed))
 
 	byte crc;
 } R_REPLY_STATUS_V170_X79;
+static_assert(sizeof(R_REPLY_STATUS_V170_X79) == 0x79, "Protocol 170 settings frame must be 121 bytes");
+
+// Register 00 20 03: protocol 170 has a 193-byte settings snapshot.
+// HW setting at frame offsets 104-105 was confirmed against the pump panel.
+typedef struct __attribute__ ((packed))
+{
+    CZ_PACKET_HEADER cz_head;
+    byte unknown[83];
+    byte hot_water_user_setting[2]; // tenths of degrees C, little endian
+    byte unknown1[86];
+    byte crc;
+} R_REPLY_STATUS_V170_SETTINGS;
+static_assert(sizeof(R_REPLY_STATUS_V170_SETTINGS) == 193, "Protocol 170 settings layout mismatch");
 
 typedef struct __attribute__ ((packed)) // 00 9d 02  02 06 00 00 ff 00 00 ff 06 d1 00 14 00 32 00 ce ff 00 00 07 00 00 00 fe
 {

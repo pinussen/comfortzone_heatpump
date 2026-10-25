@@ -1,4 +1,5 @@
 #pragma once
+#include <cstdint>
 
 class RS485Interface {
 public:
@@ -9,6 +10,8 @@ public:
     virtual void flush() = 0;
     virtual void enable_receiver_mode() = 0;
     virtual void enable_sender_mode() = 0;
+    // Optional physical edge observation. Never infer this from byte values.
+    virtual bool idle_break(uint32_t quiet_ms) { return false; }
 };
 
 #ifdef ARDUINO

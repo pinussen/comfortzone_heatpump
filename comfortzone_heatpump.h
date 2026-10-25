@@ -45,6 +45,17 @@ class comfortzone_heatpump
 
 	void begin();
 
+	// Non-blocking writes: accepted is not acknowledged. Call process() and
+	// poll_write() from the main loop, then inspect write_result().
+	enum class WriteKind { ROOM_TEMPERATURE, HOT_WATER_TEMPERATURE, SENSOR_OFFSET, FIREPLACE, FAN_SPEED, EXTRA_HOT_WATER, HEATING_CURVE };
+	enum class WriteResult { IDLE, WAITING_FOR_BUS, WAITING_FOR_REPLY, SUCCESS, FAILED };
+	bool begin_write(WriteKind kind, float value, uint16_t sensor = 0);
+	void poll_write();
+	WriteResult write_result() const { return write_result_; }
+	bool write_busy() const {
+		return write_result_ == WriteResult::WAITING_FOR_BUS || write_result_ == WriteResult::WAITING_FOR_REPLY;
+	}
+
 	// Function to call periodically to manage rs485 serial input
 	PROCESSED_FRAME_TYPE process();
 	
@@ -61,6 +72,7 @@ class comfortzone_heatpump
 	// Functions to modify heatpump settings
 	// timeout (in second) is the maximum duration before giving up (RS485 bus always busy)
 	// output: true = ok, false = failed to process
+	bool set_heating_curve(uint8_t curve, int timeout = 5);
 	bool set_fan_speed(uint8_t fan_speed, int timeout = 5);					// 1 = low, 2 = normal, 3 = fast
 	bool set_room_temperature(float room_temp, int timeout = 5);			// temperature in °C (10.0° -> 50.0°, step 0.1°)
 	bool set_hot_water_temperature(float room_temp, int timeout = 5);	// temperature in °C (10.0° -> 60.0°, step 0.1°)
@@ -87,6 +99,7 @@ class comfortzone_heatpump
 
 	// modify default address of heatpump
 	void set_heatpump_addr(byte new_heatpump_addr[4]);
+	void set_controller_addr(const byte address[4]);
 
 	// try to guess heatpump address (if needed, must be called after begin)
 	bool guess_heatpump_addr(byte guessed_addr[4], int timeout = 5);
@@ -103,6 +116,21 @@ class comfortzone_heatpump
 	FastCRC8 CRC8;
 
 	bool debug_mode = false;
+	bool staging_write_ = false;
+	WriteKind write_kind_ = WriteKind::ROOM_TEMPERATURE;
+	WriteResult write_result_ = WriteResult::IDLE;
+	byte write_command_[24] = {};
+	byte write_reply_[23] = {};
+	int write_command_size_ = 0;
+	int write_reply_size_ = 0;
+	bool write_header_only_ = false;
+	uint32_t write_started_ = 0;
+	uint32_t write_sent_ = 0;
+	uint32_t bus_frame_time_ = 0;
+	bool bus_reply_seen_ = false;
+	float write_value_ = 0;
+	char write_wait_detail_[128] = {};
+	void observe_write_frame_(bool valid_crc);
 
 	// number of bytes in last_message buffer
 	int last_message_size = 0;
@@ -111,6 +139,7 @@ class comfortzone_heatpump
 	byte cz_buf[256];							// incoming RS485 bytes
 	uint16_t cz_size = 0;					// #bytes in cz_buf
 	uint16_t cz_full_frame_size = -1;	// #bytes in the current frame
+	uint32_t last_rx_byte_time_ = 0;
 
 	// frame timestamp
 	unsigned long last_frame_timestamp = 0;

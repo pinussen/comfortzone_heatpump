@@ -4,6 +4,9 @@
   "platforms": ["Teensy", "espressif32"],
   "keywords": "comfortzone,EX50,heatpump,RS485",
   "description": "Control comfortzone heatpump",
+  "dependencies": {
+    "FastCRC": "https://github.com/vinnyspb/FastCRC.git#c25258960e313a68237bf62db08770707955b82b"
+  },
   "url": "",
   "authors":
   {

@@ -19,11 +19,11 @@
 
 #define COMFORTZONE_HEATPUMP_LAST_MESSAGE_BUFFER_SIZE 256
 
-#if defined(USE_ESPHOME) && defined(ARDUINO)
+#if defined(DEBUG) && defined(USE_ESPHOME) && defined(ARDUINO)
 #include <Arduino.h>
 #define DPRINT(...) Serial.printf("[D][comfortzone] " __VA_ARGS__)
 #define DPRINTLN(...) do { DPRINT(__VA_ARGS__); Serial.println(); } while (0)
-#elif defined(USE_ESPHOME)
+#elif defined(DEBUG) && defined(USE_ESPHOME)
 #include <esp_log.h>
 #include <cstdio>
 static const char *TAG = "comfortzone";
