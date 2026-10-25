@@ -382,9 +382,14 @@ int main(int argc, char **argv) {
     const byte bytes[]={20,20,8,25,10,26}; std::memcpy(clock.data()+21,bytes,6); crc(clock);
     test_millis+=100; bus.feed(clock); hp.process();
     assert(hp.clock_read_sequence()==1 && hp.clock_read_time()==test_millis);
+    assert(hp.clock_read_age()==0); // internal epoch; no ESPHome tick subtraction
+    test_millis+=30001; assert(hp.clock_read_age()==30001);
     assert(hp.comfortzone_status.hour==20 && hp.comfortzone_status.minute==20);
-    clock[24]=32; crc(clock); bus.feed(clock); hp.process(); assert(hp.clock_read_sequence()==1);
-    clock[24]=25; clock.back()^=1; bus.feed(clock); hp.process(); assert(hp.clock_read_sequence()==1);
+    test_millis=0xfffffff0U; bus.feed(clock); hp.process();
+    const auto sequence=hp.clock_read_sequence();
+    test_millis+=40; assert(hp.clock_read_age()==40);
+    clock[24]=32; crc(clock); bus.feed(clock); hp.process(); assert(hp.clock_read_sequence()==sequence);
+    clock[24]=25; clock.back()^=1; bus.feed(clock); hp.process(); assert(hp.clock_read_sequence()==sequence);
   }
   size_t replayed = 0;
   if (argc == 2) {

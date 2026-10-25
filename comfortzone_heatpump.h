@@ -115,6 +115,9 @@ class comfortzone_heatpump
 #if HP_PROTOCOL == HP_PROTOCOL_1_7
 	uint32_t clock_read_sequence() const { return clock_read_sequence_; }
 	uint32_t clock_read_time() const { return clock_read_time_; }
+	// Ages must use the decoder's timer, not a caller's different tick epoch.
+	uint32_t clock_read_age() const;
+	ComfortzoneOperating170::Result operating_170() const;
 	ComfortzoneOperating170::Result operating_170(uint32_t now) const { return operating_170_.result(now); }
 #endif
 

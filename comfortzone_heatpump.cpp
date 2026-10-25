@@ -16,6 +16,15 @@ void comfortzone_heatpump::begin() {
 	rs485->begin();
 }
 
+#if HP_PROTOCOL == HP_PROTOCOL_1_7
+uint32_t comfortzone_heatpump::clock_read_age() const {
+	return static_cast<uint32_t>(millis()) - clock_read_time_;
+}
+ComfortzoneOperating170::Result comfortzone_heatpump::operating_170() const {
+	return operating_170_.result(static_cast<uint32_t>(millis()));
+}
+#endif
+
 comfortzone_heatpump::PROCESSED_FRAME_TYPE comfortzone_heatpump::process()
 {
 	PROCESSED_FRAME_TYPE pft;

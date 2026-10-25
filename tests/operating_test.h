@@ -18,7 +18,7 @@ __attribute__((noinline)) inline void test_operating() {
     if (sample.reset) hp.reset(new comfortzone_heatpump(&bus));
     test_millis += 350;
     bus.feed(raw(sample.hex)); hp->process();
-    auto r = hp->operating_170(test_millis);
+    auto r = hp->operating_170();
     assert(r.mode == sample.mode && r.activity == sample.activity);
     assert(same(r.heating_input, sample.heating) && same(r.water_input, sample.water));
     if (r.mode == CZMD_ROOM_HEATING) assert(r.heating_cop > 0 && std::isnan(r.water_cop));
@@ -32,12 +32,12 @@ __attribute__((noinline)) inline void test_operating() {
       bus.feed(partial); hp->process();
       auto corrupt = raw(status_cases[1].hex); corrupt.back() ^= 1;
       bus.feed(corrupt); hp->process();
-      assert(std::isnan(hp->operating_170(test_millis).heating_input));
+      assert(std::isnan(hp->operating_170().heating_input));
       auto other = raw(status_cases[1].hex); other[6] ^= 1; crc(other);
       bus.feed(other); hp->process();
       other = raw(status_cases[1].hex); other[17] = 9; crc(other);
       bus.feed(other); hp->process();
-      assert(std::isnan(hp->operating_170(test_millis).heating_input));
+      assert(std::isnan(hp->operating_170().heating_input));
     }
   }
   assert(bus.writes == 0);
