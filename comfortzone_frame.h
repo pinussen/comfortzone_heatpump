@@ -2,6 +2,7 @@
 #define _COMFORTZONE_FRAME_H
 
 #include "platform_specific.h"
+#include <cstddef>
 
 // This file contains the description of RS485 frames
 
@@ -1227,13 +1228,15 @@ typedef struct __attribute__ ((packed))
 	byte evaporator_pressure[2];				// bar, LSB, 2 bytes, * 10
 	byte pressure_ratio[2];				// LSB, 2 bytes, * 10
 	byte unknown0a[2];		// 2bytes, LSB, either a pressure or a temperature. Goes down when PAC is off but increase when PAC is started
-	byte heatpump_current_compressor_frequency[2];	// Hz, LSB, 2bytes, * 10.
+	byte heating_frequency_candidate[2]; // 01:02d5, NOT actual frequency; remains set after stop.
 	byte unknown0b[4];
 	byte heatpump_active_max_frequency2[2];		// Hz, LSB, 2bytes, * 10. During defrost, forced to 0Hz else set to heating compressor max frequency
 	byte heatpump_active_max_frequency3[2];		// Hz, LSB, 2bytes, * 10. During defrost, forced to 0Hz else set to heating compressor max frequency
 	byte unknown0da[2];
 	byte chauffage_compressor_max_frequency3[2];
-	byte unknown0c[48];
+	byte unknown0c[6];
+	byte heatpump_current_compressor_frequency[2]; // 01:02e9, panel-confirmed Hz * 10.
+	byte unknown0c_after_frequency[40];
 	byte heatpump_current_compressor_power[2];		// W, LSB, 2 bytes
 	byte unknown0d[2];
 	byte heatpump_current_add_power[2];			// W, LSB, 2 bytes
@@ -1288,5 +1291,8 @@ typedef struct __attribute__ ((packed))
 
 	byte crc;
 } R_REPLY_STATUS_06_V170;
+static_assert(offsetof(R_REPLY_STATUS_06_V170, heatpump_current_compressor_frequency)
+              - sizeof(CZ_PACKET_HEADER) == 0x2e9 - 0x2c7,
+              "Protocol 170 actual frequency offset mismatch");
 
 #endif

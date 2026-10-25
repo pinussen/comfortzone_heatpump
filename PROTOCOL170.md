@@ -25,6 +25,16 @@ current CRC-valid reply from the configured pump are published. No partial-field
 cache is used. `Subscribable::has_value()` distinguishes missing from zero.
 Unverified mode bits are not borrowed from another protocol version.
 
+Actual compressor frequency is **01:02e9, LE16 / 10 Hz**, corrected after a
+panel-observed heating -> extra hot water -> stop sequence on 2026-10-25.
+The old 01:02d5 field remained at 29.3 Hz while the panel showed 30.0 Hz and
+later zero. During ramp-up 01:02d9 already contained 30.0 while 01:02e9 was
+29.7; stable operation alone cannot distinguish these fields.
+Both the range decoder and legacy Status 06 structure now read 02e9.
+Four captured frames in `tests/v170_frequency_fixtures.json` test heating,
+ramp-up, hot water and zero output, plus the rebased legacy path and truncated
+frequency replies. This change does not enable unverified operating-mode bits.
+
 Heating register 00:02a6 has been written and read back at 32 C and 29.1 C.
 The user confirmed that the later 29.1 C value was deliberately selected in
 Home Assistant. It is not evidence of the pump reverting a setting.

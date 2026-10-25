@@ -5,6 +5,7 @@ Usage: python3 tests/run_host_tests.py --fastcrc /path/to/FastCRC [capture.pcap 
 FastCRC must be a checkout of https://github.com/vinnyspb/FastCRC.
 """
 import argparse
+import json
 import re
 from pathlib import Path
 import struct
@@ -31,6 +32,13 @@ with tempfile.TemporaryDirectory(prefix="comfortzone-tests-") as tmp:
                                      (lib / "comfortzone_decoder.cpp").read_text())))
     (Path(tmp) / "register_fixture.h").write_text(
         "static const byte registers[][9] = {" + ",".join("{"+r+"}" for r in registers) + "};")
+    if args.protocol == 170:
+        cases = json.loads((ROOT / "tests/v170_frequency_fixtures.json").read_text())["frames"]
+        rows = ["{" + str(c["actual_frequency_raw"]) + ",{ " +
+                ",".join(str(b) for b in bytes.fromhex(c["raw"])) + "}}" for c in cases]
+        (Path(tmp) / "frequency_fixture.h").write_text(
+            "static const struct { int16_t frequency; std::vector<byte> raw; } frequency_cases[] = {" +
+            ",".join(rows) + "};")
     subprocess.run([
         "g++", "-std=c++17", "-g", "-O1", "-fsanitize=address,undefined",
         "-fno-sanitize-recover=all", "-fno-omit-frame-pointer", f"-DHP_PROTOCOL={args.protocol}",

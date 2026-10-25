@@ -1,4 +1,6 @@
 #include "host_bus.h"
+#include "comfortzone_decoder.h"
+#include "frequency_fixture.h"
 #ifdef TEST_ESPHOME_PROBE
 #include "../components/comfortzone/comfortzone_probe.h"
 #endif
@@ -320,6 +322,30 @@ int main(int argc, char **argv) {
     test_millis+=7000; hp.poll_write(); assert(hp.write_busy() && bus.writes==0);
     ready(hp,bus); test_millis+=40; hp.poll_write(); assert(bus.writes==1);
     bus.feed(ack(bus)); hp.process(); assert(hp.write_result()==Result::SUCCESS);
+  }
+  {
+    // Captured heating -> extra hot water ramp -> hot water -> zero output.
+    // Old 01:02d5 stays at 29.3 Hz; actual 01:02e9 follows the pump panel.
+    Bus bus; comfortzone_heatpump hp(&bus);
+    for (const auto &sample : frequency_cases) {
+      bus.feed(sample.raw); hp.process();
+      assert(hp.comfortzone_status.heatpump_current_compressor_frequency == sample.frequency);
+      // Rebase the same observed bytes into a full legacy 01:02c7 reply.
+      auto full = sample.raw;
+      full.erase(full.begin()+21, full.begin()+21+0x13);
+      full.pop_back(); full.resize(sizeof(R_REPLY_STATUS_06_V170),0);
+      full[10]=full.size(); full[19]=0xc7; crc(full);
+      Bus legacy_bus; comfortzone_heatpump legacy(&legacy_bus);
+      czdec::reply_r_status_06_v170(&legacy, nullptr, reinterpret_cast<R_REPLY *>(full.data()));
+      assert(legacy.comfortzone_status.heatpump_current_compressor_frequency == sample.frequency);
+    }
+    auto partial = pump_reply(); partial.resize(23); partial[10]=23;
+    partial[18]=1; partial[19]=0xe9; partial[20]=2; partial[21]=0xff; crc(partial);
+    bus.feed(partial); hp.process();
+    assert(hp.comfortzone_status.heatpump_current_compressor_frequency == 0);
+    partial[19]=0xea; crc(partial); bus.feed(partial); hp.process();
+    assert(hp.comfortzone_status.heatpump_current_compressor_frequency == 0);
+    assert(bus.writes == 0 && !bus.sending);
   }
   size_t replayed = 0;
   if (argc == 2) {

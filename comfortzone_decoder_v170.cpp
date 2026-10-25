@@ -80,8 +80,10 @@ bool czdec::decode_v170_ranges(comfortzone_heatpump *hp, CZ_PACKET_HEADER *frame
             s.filter_alarm = (active & 2) != 0;
             s.general_alarm = (active & ~2) != 0;
         }
-        // Already used by R_REPLY_STATUS_06_V170, now independent of block start.
-        r.u16(0x2d5,s.heatpump_current_compressor_frequency);
+        // Panel-confirmed heating -> extra hot water -> stop, 2026-10-25.
+        // 02d5 retains the heating demand during hot water and after stopping.
+        // 02e9 follows the actual frequency; 02d9 can lead it during ramp-up.
+        r.u16(0x2e9,s.heatpump_current_compressor_frequency);
         r.u16(0x313,s.heatpump_current_compressor_power);
         r.u16(0x317,s.heatpump_current_add_power);
         r.u16(0x319,s.heatpump_current_total_power);
