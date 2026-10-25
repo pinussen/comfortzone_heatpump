@@ -3,13 +3,21 @@
 #include <cmath>
 
 __attribute__((noinline)) inline void test_operating() {
+  auto raw = [](const char *hex) {
+    std::vector<byte> bytes;
+    for (size_t i=0; hex[i]; i+=2) {
+      auto digit = [](char c) { return c <= '9' ? c-'0' : c-'a'+10; };
+      bytes.push_back((digit(hex[i])<<4) | digit(hex[i+1]));
+    }
+    return bytes;
+  };
   auto same = [](float a, float b) { return (std::isnan(a) && std::isnan(b)) || a == b; };
   Bus bus;
   std::unique_ptr<comfortzone_heatpump> hp;
   for (const auto &sample : status_cases) {
     if (sample.reset) hp.reset(new comfortzone_heatpump(&bus));
     test_millis += 350;
-    bus.feed(sample.raw); hp->process();
+    bus.feed(raw(sample.hex)); hp->process();
     auto r = hp->operating_170(test_millis);
     assert(r.mode == sample.mode && r.activity == sample.activity);
     assert(same(r.heating_input, sample.heating) && same(r.water_input, sample.water));
@@ -17,17 +25,17 @@ __attribute__((noinline)) inline void test_operating() {
     if (r.mode == CZMD_HOT_WATER) assert(r.water_cop > 0 && std::isnan(r.heating_cop));
     if (sample.reset) {
       // Partial or corrupted power replies must not establish production.
-      auto partial = status_cases[1].raw;
+      auto partial = raw(status_cases[1].hex);
       partial.resize(partial.size()-1); partial[10] = partial.size(); crc(partial);
       // Force an actually incomplete measured range (ending before input power).
       partial.resize(40); partial[10] = 40; crc(partial);
       bus.feed(partial); hp->process();
-      auto corrupt = status_cases[1].raw; corrupt.back() ^= 1;
+      auto corrupt = raw(status_cases[1].hex); corrupt.back() ^= 1;
       bus.feed(corrupt); hp->process();
       assert(std::isnan(hp->operating_170(test_millis).heating_input));
-      auto other = status_cases[1].raw; other[6] ^= 1; crc(other);
+      auto other = raw(status_cases[1].hex); other[6] ^= 1; crc(other);
       bus.feed(other); hp->process();
-      other = status_cases[1].raw; other[17] = 9; crc(other);
+      other = raw(status_cases[1].hex); other[17] = 9; crc(other);
       bus.feed(other); hp->process();
       assert(std::isnan(hp->operating_170(test_millis).heating_input));
     }

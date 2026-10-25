@@ -50,10 +50,10 @@ with tempfile.TemporaryDirectory(prefix="comfortzone-tests-") as tmp:
                 "true" if "power" not in c["label"] else "false",
                 modes[c["expected_mode"]], activities[c["expected_activity"]],
                 number(c["expected_heating"]), number(c["expected_water"]),
-                "{" + ",".join(map(str, bytes.fromhex(c["raw"]))) + "}"]) + "}")
+                json.dumps(c["raw"])]) + "}")
         (Path(tmp) / "status_fixture.h").write_text(
             "static const struct { bool reset; COMFORTZONE_MODE mode; COMFORTZONE_COMPRESSOR_ACTIVITY activity; "
-            "float heating, water; std::vector<byte> raw; } status_cases[] = {" + ",".join(rows) + "};")
+            "float heating, water; const char *hex; } status_cases[] = {" + ",".join(rows) + "};")
     subprocess.run([
         "g++", "-std=c++17", "-g", "-O1", "-fsanitize=address,undefined",
         "-fno-sanitize-recover=all", "-fno-omit-frame-pointer", f"-DHP_PROTOCOL={args.protocol}",
