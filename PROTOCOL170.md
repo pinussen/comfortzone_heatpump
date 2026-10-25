@@ -25,10 +25,9 @@ current CRC-valid reply from the configured pump are published. No partial-field
 cache is used. `Subscribable::has_value()` distinguishes missing from zero.
 Unverified mode bits are not borrowed from another protocol version.
 
-Heating register 00:02a6 is called "Heating calculated setting" in the original
-mapping. A previous write/readback of 32 C worked, but later passive traffic
-reported 29.1 C. Persistent user-setpoint semantics are not yet established.
-Do not equate register-write success with proven price-control behaviour.
+Heating register 00:02a6 has been written and read back at 32 C and 29.1 C.
+The user confirmed that the later 29.1 C value was deliberately selected in
+Home Assistant. It is not evidence of the pump reverting a setting.
 
 Extra-hot-water buttons can send the captured bit commands, but there is no
 verified 170 readback bit for the boost state. An ACK therefore does not publish
