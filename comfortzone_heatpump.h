@@ -101,6 +101,9 @@ class comfortzone_heatpump
 	// modify default address of heatpump
 	void set_heatpump_addr(byte new_heatpump_addr[4]);
 	void set_controller_addr(const byte address[4]);
+	// Explicit site-specific assumption: zero-only traffic after a valid pump
+	// reply is idle filler. Nonzero bytes revoke it until the next valid reply.
+	void set_zero_byte_idle(bool enabled) { zero_byte_idle_ = enabled; }
 
 	// try to guess heatpump address (if needed, must be called after begin)
 	bool guess_heatpump_addr(byte guessed_addr[4], int timeout = 5);
@@ -140,6 +143,8 @@ class comfortzone_heatpump
 	uint32_t write_sent_ = 0;
 	uint32_t bus_frame_time_ = 0;
 	bool bus_reply_seen_ = false;
+	bool zero_byte_idle_ = false;
+	bool zero_tail_since_reply_ = false;
 	float write_value_ = 0;
 	char write_wait_detail_[128] = {};
 	void observe_write_frame_(bool valid_crc);

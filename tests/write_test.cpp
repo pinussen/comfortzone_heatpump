@@ -1,4 +1,5 @@
 #include "host_bus.h"
+#include "zero_idle_test.h"
 #include "comfortzone_decoder.h"
 #include "frequency_fixture.h"
 #include "status_fixture.h"
@@ -8,6 +9,7 @@
 #endif
 
 int main(int argc, char **argv) {
+  test_zero_byte_idle();
   test_operating();
 #ifdef TEST_ESPHOME_PROBE
   {

@@ -34,6 +34,7 @@ comfortzone_heatpump::PROCESSED_FRAME_TYPE comfortzone_heatpump::process()
 	{
 		const int received = rs485->read_byte();
 		if (received < 0) break;
+		if (received != 0) zero_tail_since_reply_ = false;
 		cz_buf[cz_size++] = static_cast<byte>(received);
 		last_rx_byte_time_ = static_cast<uint32_t>(millis());
 
@@ -82,9 +83,14 @@ comfortzone_heatpump::PROCESSED_FRAME_TYPE comfortzone_heatpump::process()
 
 	// Some adapters hold RX low between frames. ESP32 can report zero bytes
 	// during this break. Discard only a zero-only tail after a CRC-valid reply,
-	// and only when physical RX edge detection proves 100 ms without transitions.
+	// Physical RX detection normally requires 100 ms without transitions.
+	// An explicit zero-byte-idle policy also permits a zero-only suffix after
+	// 40 ms, provided NO nonzero byte has arrived since that valid reply.
 	// A partial real request, including any nonzero address byte, remains intact.
-	if (cz_size > 0 && bus_reply_seen_ && rs485->idle_break(100)) {
+	const uint32_t reply_age = static_cast<uint32_t>(millis()) - bus_frame_time_;
+	const bool assumed_zero_idle = zero_byte_idle_ && zero_tail_since_reply_ &&
+	                              reply_age >= 40 && reply_age < 1000;
+	if (cz_size > 0 && bus_reply_seen_ && (rs485->idle_break(100) || assumed_zero_idle)) {
 		bool only_zeros = true;
 		for (uint16_t i = 0; i < cz_size; ++i) only_zeros &= cz_buf[i] == 0;
 		if (only_zeros) cz_size = 0;

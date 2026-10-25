@@ -132,3 +132,16 @@ hour/minute-sync requests stopped at the safe-bus-gap timeout before sending
 the minute command. The pump remained approximately 247 seconds fast. Thus
 the hour/minute write map is still inferred from older versions and tested
 with synthetic ACKs, not confirmed by a live write/readback pair on 170.
+
+## Optional zero-byte idle policy
+
+`set_zero_byte_idle(true)` explicitly treats a zero-only suffix after a
+CRC-valid pump reply as idle filler. It is disabled by default. Transmission
+still requires a reply age of 40–999 ms, an empty UART and no partial frame.
+Only a zero-only parser tail may be cleared. Any nonzero byte after that reply
+revokes the override until a new valid pump reply, even if the parser later
+shifts the nonzero byte out. Requests, bad CRCs and other senders do not grant
+permission. ACK matching and the no-retry rule are unchanged.
+
+This is a site-specific assumption authorized for the EX50 investigation,
+not proof that zero bytes universally mean an electrically undriven bus.
