@@ -1050,16 +1050,16 @@ comfortzone_heatpump::PROCESSED_FRAME_TYPE czdec::process_frame(comfortzone_heat
 						
 						for(j = 0; j < 9; j++)
 						{
-							if(w_cmd->cz_head.reg_num[j] < 0x10) DPRINT("0");
+							if(w_cmd->cz_head.reg_num[j] < 0x10) { DPRINT("0"); }
 							DPRINT(w_cmd->cz_head.reg_num[j], HEX);
-							if(j < 8) DPRINT(" ");
+							if(j < 8) { DPRINT(" "); }
 						}
 						
 						DPRINT(" Value: ");
-						if(w_cmd->reg_value[0] < 0x10) DPRINT("0");
+						if(w_cmd->reg_value[0] < 0x10) { DPRINT("0"); }
 						DPRINT(w_cmd->reg_value[0], HEX);
 						DPRINT(" ");
-						if(w_cmd->reg_value[1] < 0x10) DPRINT("0");
+						if(w_cmd->reg_value[1] < 0x10) { DPRINT("0"); }
 						DPRINT(w_cmd->reg_value[1], HEX);
 						DPRINTLN("");
 
