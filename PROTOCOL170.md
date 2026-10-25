@@ -10,7 +10,7 @@ ESPHome vendors a committed snapshot with per-file hashes.
 API callback or automatic retransmission is required. The legacy synchronous
 setters remain for existing callers.
 
-The writer waits for a CRC-valid pump reply and a quiet bus. A five-second
+The writer waits for a CRC-valid pump reply and a quiet bus. A 15-second
 bus timeout means nothing was sent. A missing matching acknowledgement within
 200 ms after transmission means the outcome is unknown; do not blindly retry.
 

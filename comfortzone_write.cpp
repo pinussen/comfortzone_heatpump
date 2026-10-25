@@ -43,10 +43,12 @@ bool comfortzone_heatpump::begin_write(WriteKind kind, float value, uint16_t sen
 void comfortzone_heatpump::poll_write() {
   const uint32_t now = static_cast<uint32_t>(millis());
   if (write_result_ == WriteResult::WAITING_FOR_BUS) {
-    if (now - write_started_ >= 5000) {
+    // EX50 polling rounds can be ~7 seconds apart. Wait across two rounds
+    // without relaxing quiet-bus checks or retrying a transmitted command.
+    if (now - write_started_ >= 15000) {
       write_result_ = WriteResult::FAILED;
       std::snprintf(last_message, sizeof(last_message),
-          "No safe bus gap within 5 seconds; nothing sent. reply=%d frame_age=%lu rx_age=%lu partial=%u uart=%d idle=%d",
+          "No safe bus gap within 15 seconds; nothing sent. reply=%d frame_age=%lu rx_age=%lu partial=%u uart=%d idle=%d",
           bus_reply_seen_, static_cast<unsigned long>(now-bus_frame_time_),
           static_cast<unsigned long>(now-last_rx_byte_time_), static_cast<unsigned>(cz_size),
           rs485->available(), rs485->idle_break(100));

@@ -114,7 +114,7 @@ int main(int argc, char **argv) {
     Bus bus; comfortzone_heatpump hp(&bus);
     test_millis = 0xfffffff0U;
     assert(hp.begin_write(Kind::ROOM_TEMPERATURE, 20));
-    test_millis += 4999; hp.poll_write(); assert(hp.write_busy());
+    test_millis += 14999; hp.poll_write(); assert(hp.write_busy());
     test_millis++; hp.poll_write();
     assert(hp.write_result() == Result::FAILED && bus.writes == 0);
     assert(hp.begin_write(Kind::ROOM_TEMPERATURE, 20));
@@ -311,6 +311,14 @@ int main(int argc, char **argv) {
     for (int bank : {0,1,3,5,255}) for (int size=0;size<=233;++size)
       feed(reply(bank,bank==0 ? 0x2a0 : 0,std::vector<byte>(size,0x6a)));
     assert(bus.writes==0);
+  }
+  {
+    // Actual ~7-second polling periods exceed the former five-second queue limit.
+    Bus bus; comfortzone_heatpump hp(&bus);
+    assert(hp.begin_write(Kind::HOT_WATER_TEMPERATURE,53.1f));
+    test_millis+=7000; hp.poll_write(); assert(hp.write_busy() && bus.writes==0);
+    ready(hp,bus); test_millis+=40; hp.poll_write(); assert(bus.writes==1);
+    bus.feed(ack(bus)); hp.process(); assert(hp.write_result()==Result::SUCCESS);
   }
   size_t replayed = 0;
   if (argc == 2) {
