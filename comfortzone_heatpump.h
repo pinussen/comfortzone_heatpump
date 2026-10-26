@@ -59,6 +59,14 @@ class comfortzone_heatpump
 
 	// Function to call periodically to manage rs485 serial input
 	PROCESSED_FRAME_TYPE process();
+
+	// Counts complete received frames, not unique registers or decoded bytes.
+	// The parser currently recognizes only R/r/W/w command headers.
+	struct TrafficStats {
+		uint32_t frames{}, crc_errors{}, read_requests{}, write_requests{};
+		uint32_t read_replies{}, write_replies{}, decoded_read_replies{}, unhandled_read_replies{};
+	};
+	const TrafficStats &traffic_stats() const { return traffic_stats_; }
 	
 	// for debug purpose, it can be useful to get full frame
 	// input: pointer on buffer where last full frame will be copied
@@ -170,6 +178,7 @@ class comfortzone_heatpump
 
 	// frame timestamp
 	unsigned long last_frame_timestamp = 0;
+	TrafficStats traffic_stats_{};
 	unsigned long last_reply_frame_timestamp = 0;
 
 	// for debug purpose (see set_grab_buffer() )

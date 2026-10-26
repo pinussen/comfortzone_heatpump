@@ -41,6 +41,22 @@ __attribute__((noinline)) inline void test_operating() {
     }
   }
   assert(bus.writes == 0);
+  {
+    ComfortzoneOperating170 total;
+    assert(std::isnan(total.result(0).input_power));
+    total.power(300,2400,0,2400,800,100);
+    assert(total.result(100).input_power==800); // no mode needed for measured total
+    assert(std::isnan(total.result(100).heating_input));
+    assert(total.result(15100).input_power==800);
+    assert(std::isnan(total.result(15101).input_power));
+    total.power(0,0,0,0,65535,16000);
+    assert(std::isnan(total.result(16000).input_power));
+    total.power(0,0,0,0,0,17000);
+    assert(total.result(17000).input_power==0);
+    total.power(300,2400,0,2400,800,0xffffff00U);
+    assert(total.result(0x100U).input_power==800);
+    assert(std::isnan(total.result(0x5000U).input_power));
+  }
   const byte heat[] = {0x28,0x2a,0,0,0x10};
   const byte water[] = {0x28,0x2e,0,0,0x10};
   const byte transition[] = {0x28,0xae,0,0,0x10};

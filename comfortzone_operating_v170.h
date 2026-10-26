@@ -16,6 +16,7 @@ public:
         COMFORTZONE_MODE mode = CZMD_UNKNOWN;
         COMFORTZONE_COMPRESSOR_ACTIVITY activity = CZCMP_UNKNOWN;
         bool production_known = false;
+        float input_power = NAN;
         float heating_input = NAN, water_input = NAN;
         float heating_cop = NAN, water_cop = NAN;
     };
@@ -42,6 +43,9 @@ public:
     Result result(uint32_t now) const {
         Result r;
         if (!power_seen_ || now-power_time_ > MAX_AGE_MS) return r;
+        // Total measured input remains useful when its destination is unknown.
+        // Like the allocation, it must expire when complete power replies stop.
+        if (input_ <= 32767) r.input_power = input_;
         // A complete zero-power snapshot proves zero allocation, even when the
         // operating mode is unknown (e.g. the observed defrost candidate 1E).
         if (frequency_ == 0 && input_ == 0 && output_ == 0 && additional_ == 0 && total_ == 0) {

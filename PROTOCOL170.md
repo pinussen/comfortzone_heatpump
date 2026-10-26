@@ -161,3 +161,19 @@ acknowledged hour 21 and minute 3 and confirmed both in a subsequent full
 clock reply. Final offset was about +4.6 seconds (seconds are not written).
 The captured minute ACK and full readback are regression-tested, and both
 hour/minute evidence frames are preserved in `tests/v170_clock_write_fixtures.json`.
+
+## 2026-10-26: freshness and traffic accounting
+
+Complete power snapshots now expose `operating_170().input_power` independently
+of operating-mode recognition. It expires after 15 seconds, rejects input values
+above 32767 W and remains unknown before the first complete snapshot. This lets
+clients avoid integrating stale total power across communication gaps, just as
+for the heating/water allocations. Unknown mode still prevents allocation/COP.
+
+`traffic_stats()` counts received R, W, r and w frames separately from CRC
+failures. Read replies are split into decoded and unhandled replies; decoded
+means at least one recognized field, not complete byte coverage. Other-device
+and other-prefix replies remain unhandled. Noise/partial buffers are not counted
+as frames, and unrecognized command bytes are outside the parser's current scope.
+Regression tests cover count reconciliation, unknown addresses/sources, corrupt
+frames, input expiry, invalid input values and timer wraparound.

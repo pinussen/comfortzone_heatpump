@@ -406,6 +406,23 @@ int main(int argc, char **argv) {
     assert(hp.clock_read_sequence()==1 && hp.clock_read_age()==0);
     assert(hp.comfortzone_status.hour==21 && hp.comfortzone_status.minute==3);
   }
+  {
+    Bus bus; comfortzone_heatpump hp(&bus);
+    auto send = [&](std::vector<byte> frame) { bus.feed(frame); hp.process(); };
+    auto known=pump_reply(); send(known);
+    auto unknown=known; unknown[18]=0xfe; crc(unknown); send(unknown);
+    auto other=known; other[6]^=1; crc(other); send(other);
+    auto request=unknown; request[11]='R'; crc(request); send(request);
+    auto write=unknown; write[11]='W'; crc(write); send(write);
+    auto reply=unknown; reply[11]='w'; crc(reply); send(reply);
+    auto corrupt=known; corrupt.back()^=1; send(corrupt);
+    bus.feed({0,0,0}); hp.process(); // incomplete/noise is not a frame
+    const auto &t=hp.traffic_stats();
+    assert(t.frames==7 && t.crc_errors==1);
+    assert(t.read_requests==1 && t.write_requests==1 && t.write_replies==1);
+    assert(t.read_replies==3 && t.decoded_read_replies==1 && t.unhandled_read_replies==2);
+    assert(t.frames==t.crc_errors+t.read_requests+t.write_requests+t.read_replies+t.write_replies);
+  }
   size_t replayed = 0;
   if (argc == 2) {
     Bus bus; comfortzone_heatpump hp(&bus);

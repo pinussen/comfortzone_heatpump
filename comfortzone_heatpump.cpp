@@ -152,6 +152,19 @@ comfortzone_heatpump::PROCESSED_FRAME_TYPE comfortzone_heatpump::process()
 		pft = PFT_CORRUPTED;
 	}
 
+	++traffic_stats_.frames;
+	if (!valid_crc) ++traffic_stats_.crc_errors;
+	else switch (reinterpret_cast<CZ_PACKET_HEADER *>(cz_buf)->cmd) {
+		case 'R': ++traffic_stats_.read_requests; break;
+		case 'W': ++traffic_stats_.write_requests; break;
+		case 'w': ++traffic_stats_.write_replies; break;
+		case 'r':
+			++traffic_stats_.read_replies;
+			if (pft == PFT_REPLY) ++traffic_stats_.decoded_read_replies;
+			else ++traffic_stats_.unhandled_read_replies;
+			break;
+	}
+
 	if(grab_buffer)
 	{
 		if(cz_size > grab_buffer_size)
