@@ -141,6 +141,30 @@
       "expected_activity": "stopped",
       "expected_heating": 0,
       "expected_water": 0
+    },
+    {
+      "label": "2008000010_status",
+      "raw": "41444452078a656fde027672010203040b08010400142c381a0a1a0100142c380000400040000000200800001000000000000000000000000000000000004119fc19fc7500fe000601f1002e010601e300eb0022fc22fc050122fc22fc22fc22fc22fc22fc22fc22fc22fc22fc22fc22fc22fc26025c",
+      "time_utc": "2026-10-26T19:44:50.998354+00:00",
+      "capture": "/home/bjwl/comfortzone-check-20261026-204442/capture.pcap",
+      "capture_sha256": "5ec9d8abf2d2ee8c4bbcf1dffc9dc9dd22b5fc281c367f0b90d943c41d03b2be",
+      "note": "Passive observation; no panel label. Complete zero power proves stopped, not a specific mode.",
+      "expected_mode": "unknown",
+      "expected_heating": null,
+      "expected_water": null,
+      "expected_activity": "unknown"
+    },
+    {
+      "label": "2008000010_power",
+      "raw": "41444452078a656fde02a572010203040b0801b4021302000000000000003201ac0003016102000000002c010601ab009c000a008600000000000000ccfcccfcccfcccfc0000000000000000000000000f013403740888133601000000000000000000005e01000000000000000000005c2b0000000000000000000000000000000000000000000071000500003c0000b80b000000000000302a0000600000000000280093",
+      "time_utc": "2026-10-26T19:44:51.297439+00:00",
+      "capture": "/home/bjwl/comfortzone-check-20261026-204442/capture.pcap",
+      "capture_sha256": "5ec9d8abf2d2ee8c4bbcf1dffc9dc9dd22b5fc281c367f0b90d943c41d03b2be",
+      "note": "Passive observation; no panel label. Complete zero power proves stopped, not a specific mode.",
+      "expected_mode": "unknown",
+      "expected_heating": 0,
+      "expected_water": 0,
+      "expected_activity": "stopped"
     }
   ]
 }

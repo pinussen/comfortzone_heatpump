@@ -177,3 +177,8 @@ and other-prefix replies remain unhandled. Noise/partial buffers are not counted
 as frames, and unrecognized command bytes are outside the parser's current scope.
 Regression tests cover count reconciliation, unknown addresses/sources, corrupt
 frames, input expiry, invalid input values and timer wraparound.
+
+Passive follow-up capture on 2026-10-26 added a `20 08 00 00 10` status/zero-power
+pair to `tests/v170_status_fixtures.json`. No panel mode was recorded: compressor
+activity is stopped, allocation is zero, and mode remains unknown. This prevents
+a future decoder from inventing a mode merely from the observed zero values.
