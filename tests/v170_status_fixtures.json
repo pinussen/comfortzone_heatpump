@@ -161,7 +161,7 @@
       "capture": "/home/bjwl/comfortzone-check-20261026-204442/capture.pcap",
       "capture_sha256": "5ec9d8abf2d2ee8c4bbcf1dffc9dc9dd22b5fc281c367f0b90d943c41d03b2be",
       "note": "Passive observation; no panel label. Complete zero power proves stopped, not a specific mode.",
-      "expected_mode": "unknown",
+      "expected_mode": "idle",
       "expected_heating": 0,
       "expected_water": 0,
       "expected_activity": "stopped"
@@ -291,10 +291,10 @@
       "evidence": "Passive observation; physical mode not panel-verified",
       "label": "202a000010_nonzero_power",
       "raw": "41444452078a656fde02a572010203040b0801b4021302000000000000000000ac000301610200000000e8037f01e90047002000ba00280100002801d8feadffaeffa5fd0000280128012801280100000f013403740888133601000000000000000000005e01000000000000000000005c2b00002b09000000002b0900002b09000005030000000000000700003c0000de01000000000000302a0000e703f600fffff50070",
-      "expected_mode": "unknown",
-      "expected_heating": null,
-      "expected_water": null,
-      "expected_activity": "unknown"
+      "expected_mode": "heating",
+      "expected_heating": 773,
+      "expected_water": 0,
+      "expected_activity": "running"
     },
     {
       "capture": "comfortzone-status-20261027/capture.pcap",

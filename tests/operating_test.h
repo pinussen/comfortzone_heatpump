@@ -61,6 +61,20 @@ __attribute__((noinline)) inline void test_operating() {
   const byte water[] = {0x28,0x2e,0,0,0x10};
   const byte transition[] = {0x28,0xae,0,0,0x10};
   const byte idle[] = {0x28,0x08,0,0,0x10};
+  {
+    ComfortzoneOperating170 passive;
+    const byte heat20[] = {0x20,0x2a,0,0,0x10};
+    const byte idle20[] = {0x20,0x08,0,0,0x10};
+    const byte unobserved_water20[] = {0x20,0x2c,0,0,0x10};
+    passive.status(heat20,100); passive.power(300,2400,0,2400,800,400);
+    assert(passive.result(400).mode==CZMD_ROOM_HEATING);
+    assert(passive.result(400).heating_input==800);
+    assert(std::isnan(passive.result(15401).heating_input));
+    passive.status(idle20,16000); passive.power(0,0,0,0,0,16300);
+    assert(passive.result(16300).mode==CZMD_IDLE);
+    passive.status(unobserved_water20,17000); passive.power(300,2400,0,2400,800,17300);
+    assert(passive.result(17300).mode==CZMD_UNKNOWN);
+  }
   ComfortzoneOperating170 o;
   o.power(300,2400,0,2400,800,1000); assert(std::isnan(o.result(1000).heating_input));
   o.status(heat,1100); assert(std::isnan(o.result(1100).heating_input));

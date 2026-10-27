@@ -182,3 +182,22 @@ Passive follow-up capture on 2026-10-26 added a `20 08 00 00 10` status/zero-pow
 pair to `tests/v170_status_fixtures.json`. No panel mode was recorded: compressor
 activity is stopped, allocation is zero, and mode remains unknown. This prevents
 a future decoder from inventing a mode merely from the observed zero values.
+# Passive profile extension, 2026-10-28
+
+The EX50 capture `comfortzone-status-20261027/capture.pcap`, SHA256
+`a30aa686f6aa1f09272d2923d14282229f16f3e490b337215b57d463b03a9cb7`, contains
+1723 complete status/power pairs within two seconds with status `20 2a 00 00 10`.
+All have positive candidate heating request at `01:02d5`, zero water request
+at `01:02d7`, positive actual frequency (25–43.3 Hz) and input/output power.
+This supports the heating interpretation of the second status byte used by
+older decoders independently of first-byte bit `08`. The interpretation is
+capture-supported, not a new panel observation. `20 08 00 00 10` has 2247 paired
+all-zero snapshots and is admitted as idle only with complete zero power.
+
+Only those two `20` profiles are admitted. Other `20` profiles (including the
+unobserved `20 2c`) remain unknown. Pairing/freshness, validity and additional
+heater restrictions are unchanged. The meaning of first-byte bit `08` remains
+unknown; it must not be labelled compressor running or hot-water enable.
+The initial hypothesis that `01:00c3` mirrors that bit is contradicted by all
+four combinations in fresh observations: `(20,0)=500`, `(20,1)=14`,
+`(28,0)=317`, `(28,1)=13`. Neither candidate is exposed as a new writable field.

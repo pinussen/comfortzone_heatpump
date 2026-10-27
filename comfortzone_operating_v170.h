@@ -88,7 +88,14 @@ private:
         // including after boost is switched off; it is not a 50/50 heat split.
         // 2C is supported by the older decoder and zero heating request in
         // captured water cycles. AE/BE/1E remain unknown, including defrost.
-        if ((status_[0] != 0x28 && status_[0] != 0x2b) || status_[2] != 0 ||
+        // Passive EX50 capture 2026-10-26/27: 1723 fresh 20/2A pairs have
+        // positive heating-request frequency at 02D5, zero water request at
+        // 02D7 and positive actual frequency/input/output. 20/08 pairs are
+        // all zero. Accept these two observed profiles only; the meaning of
+        // first-byte bit 08 is still unknown (not a compressor-running bit).
+        if (status_[0] == 0x20 && status_[1] != 0x08 && status_[1] != 0x2a)
+            return CZMD_UNKNOWN;
+        if ((status_[0] != 0x20 && status_[0] != 0x28 && status_[0] != 0x2b) || status_[2] != 0 ||
             status_[3] != 0 || status_[4] != 0x10) return CZMD_UNKNOWN;
         switch (status_[1]) {
             case 0x08: return CZMD_IDLE;
