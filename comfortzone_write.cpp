@@ -13,7 +13,7 @@ bool comfortzone_heatpump::begin_write(WriteKind kind, float value, uint16_t sen
     std::snprintf(last_message, sizeof(last_message), "Value must be finite");
     return false;
   }
-  if ((kind == WriteKind::FAN_SPEED || kind == WriteKind::HEATING_CURVE ||
+  if ((kind == WriteKind::FAN_SPEED ||
        kind == WriteKind::EXTRA_HOT_WATER || kind == WriteKind::FIREPLACE ||
        kind == WriteKind::HOUR || kind == WriteKind::MINUTE) &&
       (value != std::floor(value) || value < 0 || value > 255)) {
@@ -35,7 +35,7 @@ bool comfortzone_heatpump::begin_write(WriteKind kind, float value, uint16_t sen
     case WriteKind::SENSOR_OFFSET: accepted = set_sensor_offset(sensor, value); break;
     case WriteKind::FAN_SPEED: accepted = set_fan_speed(static_cast<uint8_t>(value)); break;
     case WriteKind::EXTRA_HOT_WATER: accepted = set_extra_hot_water(value != 0); break;
-    case WriteKind::HEATING_CURVE: accepted = set_heating_curve(static_cast<uint8_t>(value)); break;
+    case WriteKind::HEATING_CURVE: accepted = set_heating_curve(value); break;
     case WriteKind::HOUR: accepted = set_hour(static_cast<uint8_t>(value)); break;
     case WriteKind::MINUTE: accepted = set_minute(static_cast<uint8_t>(value)); break;
     case WriteKind::FIREPLACE: accepted = set_fireplace_mode(value != 0); break;
@@ -112,7 +112,7 @@ void comfortzone_heatpump::observe_write_frame_(bool valid_crc) {
 #endif
   // Protocol 170 has no verified live boost-state bit. An ACK is not a lasting
   // state: publishing true here would remain stale after the pump's timer ends.
-  if (write_kind_ == WriteKind::HEATING_CURVE) comfortzone_status.heating_curve = static_cast<int16_t>(write_value_);
+  if (write_kind_ == WriteKind::HEATING_CURVE) comfortzone_status.heating_curve = static_cast<int16_t>(write_value_ * (HP_PROTOCOL == HP_PROTOCOL_2_50 ? 10.0f : 1.0f) + 0.5f);
   if (write_kind_ == WriteKind::ROOM_TEMPERATURE)
     comfortzone_status.room_heating_setting = static_cast<uint16_t>(write_value_ * 10.0f + 0.5f);
   if (write_kind_ == WriteKind::HOT_WATER_TEMPERATURE)

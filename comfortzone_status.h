@@ -3,6 +3,9 @@
 
 #include "platform_specific.h"
 
+// alarm bitmask bits (pending / acknowledged masks, acknowledge_alarm())
+#define CZ_ALARM_FILTER 0x0002
+
 typedef enum
 {
 	CZCMP_STOPPED,			// compressor is stopped
@@ -59,11 +62,12 @@ private:
 
 // Heatpump status
 // Not all values are available on all protocol version
-// Supported protocols are 1.60, 1.80, 2.21. If no protocol version is specified, only 1.60 is supported
+// Supported protocols are 1.60, 1.70, 1.80, 2.21, 2.50. If no protocol version is specified, only 1.60 is supported
+// Protocol 2.50 populates the same fields as 2.21 and adds compressor_activity and extra_hot_water_setting
 typedef struct
 {
 	Subscribable<int16_t> sensors_te10_temp;
-	Subscribable<int16_t> heating_curve;
+	Subscribable<int16_t> heating_curve; // 170: integer curve; 250: curve * 10
 	Subscribable<int16_t> hot_water_max_runtime;
 	Subscribable<int16_t> hot_water_pause_time;
 	Subscribable<int16_t> hot_water_extra_setting;
@@ -76,8 +80,10 @@ typedef struct
 
 	Subscribable<uint16_t> fan_time_to_filter_change;		// days (proto: 1.60, 1.80, 2.21)
 
-	Subscribable<bool> filter_alarm;								// true = replace/clean filter alarm, false = filter ok (proto: 1.60, 1.80)
-	Subscribable<bool> general_alarm;								// true = any active alarm (excluding filter), false = no alarm (proto: 1.60, 1.80)
+	Subscribable<bool> filter_alarm;								// true = replace/clean filter alarm, false = filter ok (proto: 1.60, 1.80, 2.50)
+	Subscribable<bool> general_alarm;								// true = any active alarm (excluding filter), false = no alarm (proto: 1.60, 1.80, 2.50)
+	Subscribable<uint16_t> alarm_pending_mask;					// raw pending alarm bitmask, bit 0x0002 = filter (proto: 2.50)
+	Subscribable<uint16_t> alarm_acknowledged_mask;				// raw acknowledged alarm bitmask (proto: 2.50)
 
 	Subscribable<bool> hot_water_production;					// true = on, false = off
 	Subscribable<bool> room_heating_in_progress;				// true = on, false = off
@@ -133,6 +139,11 @@ typedef struct
 	Subscribable<int16_t> room_heating_setting;				// °C, * 10 (user selected) (proto: 1.60, 1.80, 2.21)
 	Subscribable<int16_t> hot_water_setting;					// °C, * 10 (user selected) (proto: 1.60, 1.80)
 	Subscribable<bool> extra_hot_water_setting;				// true = on, false = off
+	Subscribable<bool> cooling_enabled;							// true = cooling mode on, false = off (proto: 2.50)
+	Subscribable<bool> fireplace_mode_enabled;					// true = temporary fireplace mode active (proto: 2.50)
+	Subscribable<uint16_t> filter_interval;						// days between filter changes (proto: 2.50)
+
+	Subscribable<bool> automatic_daylight_saving;				// true = automatic daylight saving on (proto: 2.50)
 
 	Subscribable<byte> hot_water_priority_setting;			// 1 = low, 2 = normal, 3 = fast
 

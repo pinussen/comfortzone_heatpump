@@ -82,7 +82,7 @@ class comfortzone_heatpump
 	// Functions to modify heatpump settings
 	// timeout (in second) is the maximum duration before giving up (RS485 bus always busy)
 	// output: true = ok, false = failed to process
-	bool set_heating_curve(uint8_t curve, int timeout = 5);
+
 	bool set_fan_speed(uint8_t fan_speed, int timeout = 5);					// 1 = low, 2 = normal, 3 = fast
 	bool set_room_temperature(float room_temp, int timeout = 5);			// temperature in °C (10.0° -> 50.0°, step 0.1°)
 	bool set_hot_water_temperature(float room_temp, int timeout = 5);	// temperature in °C (10.0° -> 60.0°, step 0.1°)
@@ -99,6 +99,13 @@ class comfortzone_heatpump
 	bool set_automatic_daylight_saving(bool enable, int timeout = 5);	// true = enable, false = disable
 
 	bool set_fireplace_mode(bool enable, int timeout = 5); // true = enable, false = disable
+	bool set_fan_boost(bool enable, int timeout = 5);	// true = temporary fan high speed, false = back to normal (protocol 2.50 only)
+	bool set_cooling_mode(bool enable, int timeout = 5);	// true = cooling mode on, false = off (protocol 2.50 only)
+	bool set_hot_water_priority(uint8_t priority, int timeout = 5);	// 1 = low, 2 = normal, 3 = high (protocol 2.50 only)
+	bool acknowledge_alarm(uint16_t alarm_mask, int timeout = 5);	// alarm bits to acknowledge, e.g. CZ_ALARM_FILTER or comfortzone_status.alarm_pending_mask (protocol 2.50 only)
+	bool set_filter_days_left(uint16_t days, int timeout = 5);		// filter change countdown in days; writing the interval resets the filter alarm (protocol 2.50 only)
+	bool set_filter_interval(uint16_t days, int timeout = 5);			// filter change interval in days (protocol 2.50 only)
+	bool set_heating_curve(float curve, int timeout = 5);				// heating curve: 170 integer 1..10; 250 0.0..25.5 in steps of 0.1
 
 	bool set_sensor_offset(uint16_t sensor_num, float temp_offset, int timeout = 5);	// sensor: [0:7], offset in °C (-10.0° -> 10.0°)
 
@@ -114,6 +121,10 @@ class comfortzone_heatpump
 	// reply is idle filler. Isolated 0x40 framing artifacts restart the quiet
 	// timer; other nonzero bytes revoke permission until the next valid reply.
 	void set_zero_byte_idle(bool enabled) { zero_byte_idle_ = enabled; }
+
+	// milliseconds since the last valid frame was received, or ULONG_MAX when no frame has been received yet
+	// (bus health; the control panel polls every ~3 s)
+	unsigned long last_frame_age() { return frame_received ? (millis() - last_valid_frame_timestamp_) : (unsigned long)-1; }
 
 	// try to guess heatpump address (if needed, must be called after begin)
 	bool guess_heatpump_addr(byte guessed_addr[4], int timeout = 5);
@@ -179,6 +190,8 @@ class comfortzone_heatpump
 	uint32_t last_rx_byte_time_ = 0;
 
 	// frame timestamp
+	unsigned long last_valid_frame_timestamp_ = 0;
+	bool frame_received = false;			// false until the first valid frame, so last_frame_age() cannot read as "fresh" at boot
 	unsigned long last_frame_timestamp = 0;
 	TrafficStats traffic_stats_{};
 	unsigned long last_reply_frame_timestamp = 0;
