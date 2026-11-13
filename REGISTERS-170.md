@@ -34,7 +34,7 @@ integer units and sentinels; presentation divides by the stated divisor.
 | 01:0027 | acknowledged_alarm_mask | u16 | 1 |  | type range | inherited |
 | 01:02e9 | heatpump_current_compressor_frequency | u16 | 10 | Hz | type range | panel |
 | 01:0313 | heatpump_current_compressor_power | u16 | 1 | W | type range | panel |
-| 01:0317 | heatpump_current_add_power | u16 | 1 | W | type range | panel |
+| 01:0315 | heatpump_current_add_power | u16 | 1 | W | type range | capture |
 | 01:0319 | heatpump_current_total_power | u16 | 1 | W | type range | inherited |
 | 01:0321 | heatpump_current_compressor_input_power | u16 | 1 | W | type range | inherited |
 | 05:002c | compressor_energy | u32 | 100 | kWh | type range | inherited |

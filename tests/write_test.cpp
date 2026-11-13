@@ -124,6 +124,7 @@ int main(int argc, char **argv) {
     test_millis += 14999; hp.poll_write(); assert(hp.write_busy());
     test_millis++; hp.poll_write();
     assert(hp.write_result() == Result::FAILED && bus.writes == 0);
+    assert(!hp.write_transmitted());
     assert(hp.begin_write(Kind::ROOM_TEMPERATURE, 20));
     ready(hp, bus); test_millis += 40; hp.poll_write();
 
@@ -131,6 +132,7 @@ int main(int argc, char **argv) {
     assert(hp.write_result() == Result::FAILED && !bus.sending);
     bus.feed(ack(bus)); hp.process();
     assert(hp.write_result() == Result::FAILED); // Late ack cannot revive request.
+    assert(hp.write_transmitted());
     assert(bus.writes == 1); // No automatic resend after an ambiguous timeout.
   }
   {

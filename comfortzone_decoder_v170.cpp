@@ -58,7 +58,7 @@ bool czdec::decode_v170_ranges(comfortzone_heatpump *hp, CZ_PACKET_HEADER *frame
         // do not combine a partial reply with previously cached scalar values.
         if (const auto power = r.at(0x2e9, 0x323-0x2e9)) {
             hp->operating_170_.power(get_uint16(power), get_uint16(power+0x313-0x2e9),
-                get_uint16(power+0x317-0x2e9), get_uint16(power+0x319-0x2e9),
+                get_uint16(power+0x315-0x2e9), get_uint16(power+0x319-0x2e9),
                 get_uint16(power+0x321-0x2e9), now);
         }
         // Both the short six-byte clock and larger temperature snapshots.
@@ -76,7 +76,7 @@ bool czdec::decode_v170_ranges(comfortzone_heatpump *hp, CZ_PACKET_HEADER *frame
             s.filter_alarm = (active & 2) != 0;
             s.general_alarm = (active & ~2) != 0;
         }
-        if (r.at(0x317,2)) s.additional_power_enabled = s.heatpump_current_add_power > 0;
+        if (r.at(0x315,2)) s.additional_power_enabled = s.heatpump_current_add_power > 0;
 
     }
     return r.decoded;

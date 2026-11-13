@@ -8,6 +8,7 @@ bool comfortzone_heatpump::begin_write(WriteKind kind, float value, uint16_t sen
   // Reject concurrent requests; never replace a command already on the wire.
   if (write_busy()) return false;
   write_result_ = WriteResult::IDLE;
+  write_transmitted_ = false;
   if (!std::isfinite(value)) {
     std::snprintf(last_message, sizeof(last_message), "Value must be finite");
     return false;
@@ -71,6 +72,7 @@ void comfortzone_heatpump::poll_write() {
         return;
       }
       rs485->enable_sender_mode();
+      write_transmitted_ = true; // Even a partial UART write has an uncertain outcome.
       const int written = rs485->write_bytes(write_command_, write_command_size_);
       rs485->flush();
       rs485->enable_receiver_mode();

@@ -13,6 +13,8 @@ public:
     static constexpr uint32_t PAIR_WINDOW_MS = 2000;
 
     struct Result {
+        bool status_known = false;
+        byte raw_status[5]{};
         COMFORTZONE_MODE mode = CZMD_UNKNOWN;
         COMFORTZONE_COMPRESSOR_ACTIVITY activity = CZCMP_UNKNOWN;
         bool production_known = false;
@@ -42,8 +44,11 @@ public:
 
     Result result(uint32_t now) const {
         Result r;
+        r.status_known = status_seen_ && now-status_time_ <= MAX_AGE_MS;
+        if (r.status_known) std::memcpy(r.raw_status, status_, sizeof(status_));
         if (!power_seen_ || now-power_time_ > MAX_AGE_MS) return r;
-        // Total measured input remains useful when its destination is unknown.
+        // Compressor input remains useful when its destination is unknown.
+        // This excludes the separately reported electric heater.
         // Like the allocation, it must expire when complete power replies stop.
         if (input_ <= 32767) r.input_power = input_;
         // A complete zero-power snapshot proves zero allocation, even when the
@@ -95,7 +100,12 @@ private:
         // first-byte bit 08 is still unknown (not a compressor-running bit).
         if (status_[0] == 0x20 && status_[1] != 0x08 && status_[1] != 0x2a)
             return CZMD_UNKNOWN;
-        if ((status_[0] != 0x20 && status_[0] != 0x28 && status_[0] != 0x2b) || status_[2] != 0 ||
+        // Week capture: 23/2A and 30/2A heating; 23/2E water.
+        // Do not assign a generic meaning to first-byte bits or stop profiles.
+        if (status_[0] == 0x30 && status_[1] != 0x2a) return CZMD_UNKNOWN;
+        if (status_[0] == 0x23 && status_[1] != 0x08 && status_[1] != 0x2a && status_[1] != 0x2e)
+            return CZMD_UNKNOWN;
+        if ((status_[0] != 0x23 && status_[0] != 0x30 && status_[0] != 0x20 && status_[0] != 0x28 && status_[0] != 0x2b) || status_[2] != 0 ||
             status_[3] != 0 || status_[4] != 0x10) return CZMD_UNKNOWN;
         switch (status_[1]) {
             case 0x08: return CZMD_IDLE;

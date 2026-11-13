@@ -57,6 +57,39 @@ __attribute__((noinline)) inline void test_operating() {
     assert(total.result(0x100U).input_power==800);
     assert(std::isnan(total.result(0x5000U).input_power));
   }
+  {
+    // Regression: 0315 carries the heater; 0317 stays zero in the week capture.
+    Bus heater_bus;
+    comfortzone_heatpump heater(&heater_bus);
+    auto frame = raw(status_cases[1].hex);
+    const unsigned base = frame[19] | (frame[20] << 8);
+    auto put = [&](unsigned addr, unsigned value) {
+      frame[21+addr-base]=value & 255; frame[22+addr-base]=value >> 8;
+    };
+    put(0x315,6000); put(0x317,0); put(0x319,8275);
+    crc(frame); heater_bus.feed(frame); heater.process();
+    assert(static_cast<int16_t>(heater.comfortzone_status.heatpump_current_add_power)==6000);
+    assert(static_cast<bool>(heater.comfortzone_status.additional_power_enabled));
+    put(0x315,0); put(0x319,2275); crc(frame);
+    heater_bus.feed(frame); heater.process();
+    assert(!static_cast<bool>(heater.comfortzone_status.additional_power_enabled));
+  }
+  {
+    ComfortzoneOperating170 observed;
+    for (byte first : {byte(0x23),byte(0x30)}) {
+      const byte profile[] = {first,0x2a,0,0,0x10};
+      observed.status(profile,100); observed.power(300,2400,0,2400,800,200);
+      assert(observed.result(200).mode==CZMD_ROOM_HEATING);
+      assert(observed.result(200).status_known);
+      assert(observed.result(200).raw_status[0]==first);
+      assert(!observed.result(15201).status_known);
+      observed.power(300,2400,6000,8400,800,201);
+      assert(std::isnan(observed.result(201).heating_input));
+    }
+    const byte unknown[] = {0x30,0x2c,0,0,0x10};
+    observed.status(unknown,300); observed.power(300,2400,0,2400,800,400);
+    assert(observed.result(400).mode==CZMD_UNKNOWN);
+  }
   const byte heat[] = {0x28,0x2a,0,0,0x10};
   const byte water[] = {0x28,0x2e,0,0,0x10};
   const byte transition[] = {0x28,0xae,0,0,0x10};

@@ -201,3 +201,27 @@ unknown; it must not be labelled compressor running or hot-water enable.
 The initial hypothesis that `01:00c3` mirrors that bit is contradicted by all
 four combinations in fresh observations: `(20,0)=500`, `(20,1)=14`,
 `(28,0)=317`, `(28,1)=13`. Neither candidate is exposed as a new writable field.
+
+
+## Week capture, 2026-10-28 through 2026-11-04
+
+The electric heater is at bank 01 address 0315, not 0317. Original
+CRC-valid power snapshots show 500 W increments through 6000 W, with
+0313 + 0315 == 0319 and a rising additional-energy counter. 0317 remains
+zero in these samples. The 0321 input is compressor input; it must not be
+labelled whole-appliance electrical consumption. Heater output is not added
+to the compressor COP calculation. Raw examples are in tests/v170_week_fixtures.json.
+
+The Monday 02:00 cycle reached 69.8 C and consumed approximately 3.67 kWh
+of additional energy. First status bytes progressed 2B -> 23 -> 20 at
+05:00. This is consistent with the configured 70 C/180 minute boost, but
+does not yet distinguish scheduled disinfection from manual boost.
+
+Capture-supported production profiles now include 23/2A and 30/2A for
+heating, and 23/2E for water, subject to the existing fresh status/power
+pair and positive-power checks. Other first/second-byte combinations remain
+unknown. No generic defrost or legionella flag has been asserted.
+
+Async writes expose whether UART transmission was attempted. A failed write
+with no transmission can be rescheduled by the caller. A partial transmission
+or missing ACK remains ambiguous and must not be retried automatically.

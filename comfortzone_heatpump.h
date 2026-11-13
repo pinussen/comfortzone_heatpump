@@ -53,6 +53,7 @@ class comfortzone_heatpump
 	bool begin_write(WriteKind kind, float value, uint16_t sensor = 0);
 	void poll_write();
 	WriteResult write_result() const { return write_result_; }
+	bool write_transmitted() const { return write_transmitted_; }
 	bool write_busy() const {
 		return write_result_ == WriteResult::WAITING_FOR_BUS || write_result_ == WriteResult::WAITING_FOR_REPLY;
 	}
@@ -145,6 +146,7 @@ class comfortzone_heatpump
 	bool debug_mode = false;
 	bool staging_write_ = false;
 	WriteKind write_kind_ = WriteKind::ROOM_TEMPERATURE;
+	bool write_transmitted_ = false;
 	WriteResult write_result_ = WriteResult::IDLE;
 	byte write_command_[24] = {};
 	byte write_reply_[23] = {};
