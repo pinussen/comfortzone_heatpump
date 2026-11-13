@@ -1145,7 +1145,7 @@ void czdec::reply_r_log_raw(comfortzone_heatpump *czhp, KNOWN_REGISTER *kr, R_RE
 	// The ESPHome component can access czhp->cz_buf and format the output
 	return;
 	#endif
-	
+
 	int i;
 	int payload_start = sizeof(CZ_PACKET_HEADER); // Replies start directly with data.
 	
