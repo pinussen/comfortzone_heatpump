@@ -289,3 +289,35 @@ is stopped, and unsupported register/profile interpretations remain unknown.
 Host regressions cover the observed 30 s gap, expiry at the boundary, changed
 status, invalid/partial frames, and timestamp rollover. Firmware installation
 and a longer post-install observation are still required for live confirmation.
+
+## 2026-11-14: accumulated energy is not all electrical input
+
+The 7-day capture from 2026-10-28 through 2026-11-04 contains 68,024 complete
+bank-05 counter observations and no counter decreases. Matched-window
+comparison with 68,013 complete power replies (99.7417% bounded coverage)
+supports these meanings:
+
+- `05:002c compressor_energy`: accumulated compressor **heat output**.
+  Increase 275.48 kWh versus integrated output 273.490 kWh, but electrical
+  input only 101.420 kWh. Do not use this counter as compressor electricity.
+- `05:0030 add_energy`: electric-heater contribution, increasing 10.51 kWh
+  versus integrated heater power 10.516 kWh. Its accuracy remains that of
+  the pump's own accounting, not an independent calibrated meter.
+- `05:0034 hot_water_energy`: evidence supports delivered hot-water **heat**,
+  including heater contribution. Eight well-covered water-dominant half-hour
+  windows increase 8.36 kWh versus integrated water heat plus heater 8.330 kWh,
+  while water electricity plus heater gives only 4.187 kWh.
+
+These counters have 0.01 kWh resolution. They are accumulated since an
+unverified start/reset epoch, not daily totals. The panel values supplied on
+2026-11-14 (73333.02, 6642.99, 13354.04 kWh) agree with continued accumulation.
+The water candidate allocation is incomplete across the full week and does
+not establish generic operating bits. Total-week water counter increase is
+27.95 kWh, compared with candidate water heat + heater 26.860 kWh.
+
+No persistent compressor electrical-input counter has been verified among
+these three registers. Electrical integration cannot recover ESP32 downtime
+from these heat counters or a fixed COP. No runtime decoding/HA IDs changed.
+
+Reproducible analyzer, tested boundary/reset/CRC handling, and detailed results:
+[ESPHome integration energy analysis](https://github.com/pinussen/esphome-comfortzone/blob/feature/ex50-register-controls/ENERGI-170.md).
