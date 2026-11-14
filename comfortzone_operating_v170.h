@@ -9,7 +9,9 @@
 // does not prove production. No generic bit interpretation for unknown states.
 class ComfortzoneOperating170 {
 public:
-    static constexpr uint32_t MAX_AGE_MS = 15000;
+    // EX50 replies normally repeat every 7 s, but observed gaps reach 29.24 s.
+    // Allow missed polling cycles, while still expiring a silent source.
+    static constexpr uint32_t MAX_AGE_MS = 45000;
     static constexpr uint32_t PAIR_WINDOW_MS = 2000;
 
     struct Result {

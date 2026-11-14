@@ -133,9 +133,9 @@ class comfortzone_heatpump
 	COMFORTZONE_STATUS comfortzone_status;
 
 #if HP_PROTOCOL == HP_PROTOCOL_1_7
-    bool priority_fresh() const { return comfortzone_status.hot_water_priority_setting.has_value() && static_cast<uint32_t>(millis()-priority_read_time_) <= 15000; }
-    bool fireplace_fresh() const { return comfortzone_status.fireplace_mode_enabled.has_value() && static_cast<uint32_t>(millis()-fireplace_read_time_) <= 15000; }
-    bool extra_water_fresh() const { return comfortzone_status.extra_hot_water_setting.has_value() && static_cast<uint32_t>(millis()-extra_water_read_time_) <= 15000; }
+    bool priority_fresh() const { return comfortzone_status.hot_water_priority_setting.has_value() && static_cast<uint32_t>(millis()-priority_read_time_) <= ComfortzoneOperating170::MAX_AGE_MS; }
+    bool fireplace_fresh() const { return comfortzone_status.fireplace_mode_enabled.has_value() && static_cast<uint32_t>(millis()-fireplace_read_time_) <= ComfortzoneOperating170::MAX_AGE_MS; }
+    bool extra_water_fresh() const { return comfortzone_status.extra_hot_water_setting.has_value() && static_cast<uint32_t>(millis()-extra_water_read_time_) <= ComfortzoneOperating170::MAX_AGE_MS; }
 	uint32_t clock_read_sequence() const { return clock_read_sequence_; }
 	uint32_t clock_read_time() const { return clock_read_time_; }
 	// Ages must use the decoder's timer, not a caller's different tick epoch.

@@ -47,15 +47,15 @@ __attribute__((noinline)) inline void test_operating() {
     total.power(300,2400,0,2400,800,100);
     assert(total.result(100).input_power==800); // no mode needed for measured total
     assert(std::isnan(total.result(100).heating_input));
-    assert(total.result(15100).input_power==800);
-    assert(std::isnan(total.result(15101).input_power));
+    assert(total.result(100+ComfortzoneOperating170::MAX_AGE_MS).input_power==800);
+    assert(std::isnan(total.result(101+ComfortzoneOperating170::MAX_AGE_MS).input_power));
     total.power(0,0,0,0,65535,16000);
     assert(std::isnan(total.result(16000).input_power));
     total.power(0,0,0,0,0,17000);
     assert(total.result(17000).input_power==0);
     total.power(300,2400,0,2400,800,0xffffff00U);
     assert(total.result(0x100U).input_power==800);
-    assert(std::isnan(total.result(0x5000U).input_power));
+    assert(std::isnan(total.result(0x10000U).input_power));
   }
   {
     // Regression: 0315 carries the heater; 0317 stays zero in the week capture.
@@ -82,7 +82,7 @@ __attribute__((noinline)) inline void test_operating() {
       assert(observed.result(200).mode==CZMD_ROOM_HEATING);
       assert(observed.result(200).status_known);
       assert(observed.result(200).raw_status[0]==first);
-      assert(!observed.result(15201).status_known);
+      assert(!observed.result(201+ComfortzoneOperating170::MAX_AGE_MS).status_known);
       observed.power(300,2400,6000,8400,800,201);
       assert(std::isnan(observed.result(201).heating_input));
     }
@@ -102,11 +102,25 @@ __attribute__((noinline)) inline void test_operating() {
     passive.status(heat20,100); passive.power(300,2400,0,2400,800,400);
     assert(passive.result(400).mode==CZMD_ROOM_HEATING);
     assert(passive.result(400).heating_input==800);
-    assert(std::isnan(passive.result(15401).heating_input));
+    assert(std::isnan(passive.result(401+ComfortzoneOperating170::MAX_AGE_MS).heating_input));
     passive.status(idle20,16000); passive.power(0,0,0,0,0,16300);
     assert(passive.result(16300).mode==CZMD_IDLE);
     passive.status(unobserved_water20,17000); passive.power(300,2400,0,2400,800,17300);
     assert(passive.result(17300).mode==CZMD_UNKNOWN);
+  }
+  // Captured polling gaps must not cause unknown pulses; a changed status
+  // still invalidates allocation immediately, and a silent source expires.
+  {
+    ComfortzoneOperating170 gap;
+    gap.status(heat,100); gap.power(300,2400,0,2400,800,400);
+    assert(gap.result(30000).heating_input==800);
+    assert(gap.result(45100).status_known);
+    assert(!gap.result(45101).status_known);
+    assert(std::isnan(gap.result(45401).input_power));
+    gap.status(water,30100);
+    assert(std::isnan(gap.result(30100).water_input));
+    gap.power(300,2400,0,2400,800,30400);
+    assert(gap.result(30400).water_input==800);
   }
   ComfortzoneOperating170 o;
   o.power(300,2400,0,2400,800,1000); assert(std::isnan(o.result(1000).heating_input));
@@ -116,7 +130,7 @@ __attribute__((noinline)) inline void test_operating() {
   o.status(water,2000); assert(std::isnan(o.result(2000).heating_input));
   o.power(300,2400,0,2400,800,2300); assert(o.result(2300).water_input==800);
   o.status(water,9000); assert(o.result(9000).water_input==800);
-  assert(std::isnan(o.result(18000).water_input)); // power expired independently of status
+  assert(std::isnan(o.result(2301+ComfortzoneOperating170::MAX_AGE_MS).water_input)); // power expired independently of status
   o.power(300,2400,0,2400,800,18001); assert(std::isnan(o.result(18001).water_input)); // unpaired
   o.status(water,18100); o.power(300,2400,500,2900,800,18400);
   assert(o.result(18400).mode==CZMD_HOT_WATER && std::isnan(o.result(18400).water_input));
@@ -127,9 +141,9 @@ __attribute__((noinline)) inline void test_operating() {
   assert(r.mode==CZMD_UNKNOWN && r.activity==CZCMP_STOPPED && r.heating_input==0 && r.water_input==0);
   assert(std::isnan(r.heating_cop) && std::isnan(r.water_cop));
   o.status(idle,19500); assert(o.result(19500).mode==CZMD_IDLE);
-  assert(!o.result(35000).production_known);
+  assert(!o.result(19401+ComfortzoneOperating170::MAX_AGE_MS).production_known);
   // Unsigned clock arithmetic survives the ESP32 millis wraparound.
   o.status(heat,0xffffff00U); o.power(300,2400,0,2400,800,0x20U);
   assert(o.result(0x100U).heating_input==800);
-  assert(std::isnan(o.result(0x5000U).heating_input));
+  assert(std::isnan(o.result(0x10000U).heating_input));
 }

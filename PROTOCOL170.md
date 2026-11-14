@@ -96,7 +96,8 @@ interpreted as equal energy allocation to heating and water.
 A complete power reply must contain 01:02e9..0322: actual frequency, output,
 additional power, total power and input. It must follow the complete status by
 at most 2 seconds. Changed status invalidates the previous nonzero pairing.
-Both snapshots expire after 15 seconds (normal polling is about 7 seconds).
+Both snapshots expire after 45 seconds (normal polling is about 7 seconds;
+observed gaps reach 29.24 seconds).
 Unsigned timestamp subtraction supports millis wraparound. Partial replies,
 CRC errors, other senders and other protocol prefixes cannot create a pair.
 
@@ -165,7 +166,7 @@ hour/minute evidence frames are preserved in `tests/v170_clock_write_fixtures.js
 ## 2026-10-26: freshness and traffic accounting
 
 Complete power snapshots now expose `operating_170().input_power` independently
-of operating-mode recognition. It expires after 15 seconds, rejects input values
+of operating-mode recognition. It expires after 45 seconds (updated 2026-11-14), rejects input values
 above 32767 W and remains unknown before the first complete snapshot. This lets
 clients avoid integrating stale total power across communication gaps, just as
 for the heating/water allocations. Unknown mode still prevents allocation/COP.
@@ -247,7 +248,7 @@ readbacks and commands are preserved in tests/v170_panel_controls.json.
   at 41:0017. Both ACK values were 0c in this session; previous successful
   activation had 08. Match CRC/address/register/header, not a fixed status
   byte, and publish enabled/requested state only from readback.
-- Freshness for each readback is 15 seconds, independently refreshed by a
+- Freshness for each readback is 45 seconds, independently refreshed by a
   complete two-byte word in a CRC-valid reply. Split/invalid frames cannot
   refresh the state. No guessed mode is assigned to the changed upper bits.
 - Panel confirms HW extra setting 70 C and HW extra time 180 min. No separate
@@ -264,3 +265,27 @@ likewise. The select displays its last confirmed option when data expires
 updated optimistically by sending a command. The text sensor indicates freshness.
 These firmware changes are host-tested; new priority writes still need a live
 ESP32 test. Panel observations verify the wire commands, not our new firmware.
+
+
+## 2026-11-14: intermittent unknown values
+
+The panel capture `comfortzone-panel-20261114-152136/data/capture.pcap`
+contains complete CRC-valid status/power replies normally about 7 s apart.
+Status gaps: median 7.02 s, p95 18.33 s, maximum 29.24 s (10 gaps >15 s).
+Power gaps: median 7.01 s, p95 17.91 s, maximum 29.22 s (9 gaps >15 s).
+Priority maximum gap: 28.12 s (4 gaps >15 s). Capture gaps alone cannot
+separate polling pauses from missed forwarding/network packets.
+
+The previous 15 s expiry could therefore create short unknown pulses.
+All protocol-170 derived status/power and panel flag freshness now share a
+45 s bound. Complete CRC-valid snapshots remain required; the 2 s status/power
+pairing window and immediate invalidation on changed status are unchanged.
+No missing measurement is replaced by zero. At startup or after 45 s of silence,
+values remain/become unknown. Energy integration can hold the last measured
+power for up to 45 s; it is an estimate over that interval, not a measured
+reconstruction of missing traffic. COP remains unknown when the compressor
+is stopped, and unsupported register/profile interpretations remain unknown.
+
+Host regressions cover the observed 30 s gap, expiry at the boundary, changed
+status, invalid/partial frames, and timestamp rollover. Firmware installation
+and a longer post-install observation are still required for live confirmation.

@@ -13,6 +13,8 @@ inline void test_panel_controls() {
     } else if (std::string(sample.field)=="fireplace") {
       assert(hp.fireplace_fresh()); assert(s.fireplace_mode_enabled==bool(sample.value));
     } else { assert(hp.extra_water_fresh()); assert(s.extra_hot_water_setting==bool(sample.value)); }
+    test_millis+=30000;
+    assert(hp.priority_fresh() || hp.fireplace_fresh() || hp.extra_water_fresh());
     test_millis+=15001;
     assert(!hp.priority_fresh() && !hp.fireplace_fresh() && !hp.extra_water_fresh());
     // A one-byte fragment does not refresh a two-byte flag word.
