@@ -41,7 +41,11 @@ public:
         total_ = total; input_ = input;
         power_time_ = now;
         power_seen_ = true;
-        paired_ = status_seen_ && now-status_time_ <= PAIR_WINDOW_MS;
+        // A later power-only reply must not discard an already confirmed
+        // pairing while the observed status is unchanged and still fresh.
+        // status() clears the pairing on change or an expired status gap.
+        paired_ = status_seen_ && now-status_time_ <= MAX_AGE_MS &&
+                  (paired_ || now-status_time_ <= PAIR_WINDOW_MS);
     }
 
     Result result(uint32_t now) const {

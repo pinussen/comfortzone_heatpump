@@ -122,6 +122,25 @@ __attribute__((noinline)) inline void test_operating() {
     gap.power(300,2400,0,2400,800,30400);
     assert(gap.result(30400).water_input==800);
   }
+  // A power-only poll retains the established mode; changed or expired
+  // status must still establish a new close pair before allocation resumes.
+  {
+    ComfortzoneOperating170 retained;
+    retained.status(heat,100); retained.power(300,2400,0,2400,800,400);
+    retained.power(300,2400,0,2400,900,8000);
+    assert(retained.result(8000).heating_input==900);
+    retained.status(water,9000);
+    retained.power(300,2400,0,2400,1000,12000);
+    assert(std::isnan(retained.result(12000).water_input));
+    retained.status(water,13000); retained.power(300,2400,0,2400,1000,13300);
+    assert(retained.result(13300).water_input==1000);
+    retained.power(300,2400,0,2400,1000,59000);
+    assert(std::isnan(retained.result(59000).water_input));
+    retained.status(water,60000); retained.power(300,2400,0,2400,1000,63000);
+    assert(std::isnan(retained.result(63000).water_input));
+    retained.status(water,64000); retained.power(300,2400,0,2400,1000,64300);
+    assert(retained.result(64300).water_input==1000);
+  }
   ComfortzoneOperating170 o;
   o.power(300,2400,0,2400,800,1000); assert(std::isnan(o.result(1000).heating_input));
   o.status(heat,1100); assert(std::isnan(o.result(1100).heating_input));
@@ -131,7 +150,7 @@ __attribute__((noinline)) inline void test_operating() {
   o.power(300,2400,0,2400,800,2300); assert(o.result(2300).water_input==800);
   o.status(water,9000); assert(o.result(9000).water_input==800);
   assert(std::isnan(o.result(2301+ComfortzoneOperating170::MAX_AGE_MS).water_input)); // power expired independently of status
-  o.power(300,2400,0,2400,800,18001); assert(std::isnan(o.result(18001).water_input)); // unpaired
+  o.power(300,2400,0,2400,800,18001); assert(o.result(18001).water_input==800); // confirmed unchanged status
   o.status(water,18100); o.power(300,2400,500,2900,800,18400);
   assert(o.result(18400).mode==CZMD_HOT_WATER && std::isnan(o.result(18400).water_input));
   o.power(300,2400,0,2400,0,18500); assert(o.result(18500).mode==CZMD_UNKNOWN);

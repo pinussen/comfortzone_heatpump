@@ -95,7 +95,9 @@ interpreted as equal energy allocation to heating and water.
 
 A complete power reply must contain 01:02e9..0322: actual frequency, output,
 additional power, total power and input. It must follow the complete status by
-at most 2 seconds. Changed status invalidates the previous nonzero pairing.
+at most 2 seconds to establish a pairing. Subsequent power-only replies retain
+that pairing while the status remains unchanged and fresh. Changed status
+invalidates the previous nonzero pairing.
 Both snapshots expire after 45 seconds (normal polling is about 7 seconds;
 observed gaps reach 29.24 seconds).
 Unsigned timestamp subtraction supports millis wraparound. Partial replies,
@@ -321,3 +323,28 @@ from these heat counters or a fixed COP. No runtime decoding/HA IDs changed.
 
 Reproducible analyzer, tested boundary/reset/CRC handling, and detailed results:
 [ESPHome integration energy analysis](https://github.com/pinussen/esphome-comfortzone/blob/feature/ex50-register-controls/ENERGI-170.md).
+
+
+## 2026-11-14: preserve a confirmed status/power pairing
+
+The previous `power()` implementation unconditionally replaced `paired_` with
+whether the latest status was <=2 s old. Thus a power-only poll discarded a
+valid existing mode association even when that status was unchanged and fresh.
+This excluded electricity from both per-use totals while total input continued.
+
+A confirmed pairing now survives subsequent complete power observations while
+status age is <=45 s. A new pairing still requires <=2 s. A changed status or
+an expired status gap clears the pairing immediately; unknown profiles,
+invalid measurements and the additional-heater allocation guard are unchanged.
+
+Offline replay of the 2026-10-28/11-04 capture, integrating at message event
+boundaries, yields 101.422 kWh total under both rules. Allocated energy increases
+from 59.889 to 95.969 kWh (59.05% to 94.62%). The old pair-window gate accounts
+for 38.579 kWh of excluded input. After retention, 5.453 kWh remains unassigned:
+3.101 kWh heater-active guard, 1.038 kWh missing initial pair, 0.836 kWh unknown
+profile and 0.478 kWh expired status. This replay approximates ESPHome's 1 s
+right-integration; it is not an exact reconstruction of HA history.
+
+Regression tests require an initial close pair, preserve it over a power-only
+poll, reject delayed power after a changed status, and expire the association
+across silence. Existing totals are not backfilled by a firmware update.
