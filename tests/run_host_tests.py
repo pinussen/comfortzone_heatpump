@@ -54,6 +54,12 @@ with tempfile.TemporaryDirectory(prefix="comfortzone-tests-") as tmp:
         (Path(tmp) / "status_fixture.h").write_text(
             "static const struct { bool reset; COMFORTZONE_MODE mode; COMFORTZONE_COMPRESSOR_ACTIVITY activity; "
             "float heating, water; const char *hex; } status_cases[] = {" + ",".join(rows) + "};")
+    if args.protocol == 170:
+        cases = json.loads((ROOT / "tests/v170_panel_controls.json").read_text())["samples"]
+        rows = ["{" + json.dumps(c["field"]) + "," + str(c["expected"]) + ",{" +
+                ",".join(str(b) for b in bytes.fromhex(c["raw"])) + "}}" for c in cases]
+        (Path(tmp) / "panel_fixture.h").write_text(
+            "static const struct { const char *field; int value; std::vector<byte> raw; } panel_cases[] = {" + ",".join(rows) + "};")
     subprocess.run([
         "g++", "-std=c++17", "-g", "-O1", "-fsanitize=address,undefined",
         "-fno-sanitize-recover=all", "-fno-omit-frame-pointer", f"-DHP_PROTOCOL={args.protocol}",

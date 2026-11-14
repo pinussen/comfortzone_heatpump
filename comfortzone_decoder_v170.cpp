@@ -51,8 +51,24 @@ bool czdec::decode_v170_ranges(comfortzone_heatpump *hp, CZ_PACKET_HEADER *frame
                 field.publish(s, value);
         }
     }
+    if (frame->reg_num[6] == 0) {
+        if (const auto flags = r.at(0x0e, 2)) {
+            s.hot_water_priority_setting = get_uint16(flags) & 3;
+            hp->priority_read_time_ = static_cast<uint32_t>(millis());
+        }
+    }
     if (frame->reg_num[6] == 1) {
         const auto now = static_cast<uint32_t>(millis());
+        // Panel-confirmed OFF/ON/OFF, 2026-11-14. Decode the actual flag word,
+        // including short readbacks; do not infer requests from compressor state.
+        if (const auto flags = r.at(0x13, 2)) {
+            s.fireplace_mode_enabled = (get_uint16(flags) & 0x0400) != 0;
+            hp->fireplace_read_time_ = now;
+        }
+        if (const auto flags = r.at(0x17, 2)) {
+            s.extra_hot_water_setting = (get_uint16(flags) & 1) != 0;
+            hp->extra_water_read_time_ = now;
+        }
         if (const auto status = r.at(0x17, 5)) hp->operating_170_.status(status, now);
         // One contiguous snapshot must cover frequency and every power field;
         // do not combine a partial reply with previously cached scalar values.

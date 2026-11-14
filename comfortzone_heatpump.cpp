@@ -643,9 +643,9 @@ bool comfortzone_heatpump::set_extra_hot_water(bool enable, int timeout)
 	czcraft::craft_w_cmd(this, &cmd, kr->reg_num, cmd_value);
 	czcraft::craft_w_reply(this, &expected_reply, kr->reg_num, reply_value);
 
-	push_result = push_settings((byte*)&cmd, sizeof(cmd), (byte*)&expected_reply, sizeof(expected_reply), timeout);
+	push_result = push_settings((byte*)&cmd, sizeof(cmd), (byte*)&expected_reply, sizeof(expected_reply), timeout, HP_PROTOCOL == HP_PROTOCOL_1_7);
 
-	if(push_result == true && !staging_write_)
+	if(push_result == true && !staging_write_ && HP_PROTOCOL != HP_PROTOCOL_1_7)
 	{
 		// on success, immediatly update status cache. Without this, if status cache is sent to client
 		// before receiving update from heatpump, an incorrect value is returned

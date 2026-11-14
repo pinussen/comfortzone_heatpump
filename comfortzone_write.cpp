@@ -1,5 +1,6 @@
 #include "comfortzone_heatpump.h"
 #include "comfortzone_frame.h"
+#include "comfortzone_crafting.h"
 #include <cmath>
 #include <cstdio>
 #include <cstring>
@@ -13,7 +14,7 @@ bool comfortzone_heatpump::begin_write(WriteKind kind, float value, uint16_t sen
     std::snprintf(last_message, sizeof(last_message), "Value must be finite");
     return false;
   }
-  if ((kind == WriteKind::FAN_SPEED ||
+  if ((kind == WriteKind::FAN_SPEED || kind == WriteKind::HOT_WATER_PRIORITY ||
        kind == WriteKind::EXTRA_HOT_WATER || kind == WriteKind::FIREPLACE ||
        kind == WriteKind::HOUR || kind == WriteKind::MINUTE) &&
       (value != std::floor(value) || value < 0 || value > 255)) {
@@ -21,6 +22,9 @@ bool comfortzone_heatpump::begin_write(WriteKind kind, float value, uint16_t sen
   }
   if ((kind == WriteKind::EXTRA_HOT_WATER || kind == WriteKind::FIREPLACE) && value > 1) {
     std::snprintf(last_message, sizeof(last_message), "Expected 0 or 1"); return false;
+  }
+  if (kind == WriteKind::HOT_WATER_PRIORITY && (value < 1 || value > 3)) {
+    std::snprintf(last_message, sizeof(last_message), "Priority must be 1..3"); return false;
   }
   write_kind_ = kind;
   write_value_ = value;
@@ -38,6 +42,13 @@ bool comfortzone_heatpump::begin_write(WriteKind kind, float value, uint16_t sen
     case WriteKind::HEATING_CURVE: accepted = set_heating_curve(value); break;
     case WriteKind::HOUR: accepted = set_hour(static_cast<uint8_t>(value)); break;
     case WriteKind::MINUTE: accepted = set_minute(static_cast<uint8_t>(value)); break;
+    case WriteKind::HOT_WATER_PRIORITY:
+#if HP_PROTOCOL == HP_PROTOCOL_1_7
+      accepted = stage_priority_170_(false);
+#else
+      std::snprintf(last_message, sizeof(last_message), "Async priority control requires protocol 170");
+#endif
+      break;
     case WriteKind::FIREPLACE: accepted = set_fireplace_mode(value != 0); break;
   }
   staging_write_ = false;
@@ -52,7 +63,8 @@ void comfortzone_heatpump::poll_write() {
     if (now - write_started_ >= 15000) {
       write_result_ = WriteResult::FAILED;
       std::snprintf(last_message, sizeof(last_message),
-          "No safe bus gap within 15 seconds; nothing sent. reply=%d frame_age=%lu rx_age=%lu partial=%u uart=%d idle=%d",
+          "No safe bus gap within 15 seconds; %s. reply=%d frame_age=%lu rx_age=%lu partial=%u uart=%d idle=%d",
+          write_transmitted_ ? "earlier command sent; priority may be partially changed" : "nothing sent",
           bus_reply_seen_, static_cast<unsigned long>(now-bus_frame_time_),
           static_cast<unsigned long>(now-last_rx_byte_time_), static_cast<unsigned>(cz_size),
           rs485->available(), rs485->idle_break(100));
@@ -104,17 +116,41 @@ void comfortzone_heatpump::observe_write_frame_(bool valid_crc) {
     std::snprintf(last_message, sizeof(last_message), "Unexpected acknowledgement value 0x%02X", cz_buf[21]);
     return;
   }
+#if HP_PROTOCOL == HP_PROTOCOL_1_7
+  if (write_kind_ == WriteKind::HOT_WATER_PRIORITY && !priority_set_phase_) {
+    // First ACK only: preserve the transaction and wait for another safe gap.
+    staging_write_ = true;
+    if (!stage_priority_170_(true)) write_result_ = WriteResult::FAILED;
+    staging_write_ = false;
+    return;
+  }
+#endif
   write_result_ = WriteResult::SUCCESS;
   std::snprintf(last_message, sizeof(last_message), "Pump acknowledged write");
   if (write_kind_ == WriteKind::FAN_SPEED) comfortzone_status.fan_speed = static_cast<byte>(write_value_);
 #if HP_PROTOCOL != HP_PROTOCOL_1_7
   if (write_kind_ == WriteKind::EXTRA_HOT_WATER) comfortzone_status.extra_hot_water_setting = write_value_ != 0;
 #endif
-  // Protocol 170 has no verified live boost-state bit. An ACK is not a lasting
-  // state: publishing true here would remain stale after the pump's timer ends.
+  // Protocol 170 publishes boost, fireplace and priority only from readbacks.
+  // ACK status bytes are not boolean echoes.
   if (write_kind_ == WriteKind::HEATING_CURVE) comfortzone_status.heating_curve = static_cast<int16_t>(write_value_ * (HP_PROTOCOL == HP_PROTOCOL_2_50 ? 10.0f : 1.0f) + 0.5f);
   if (write_kind_ == WriteKind::ROOM_TEMPERATURE)
     comfortzone_status.room_heating_setting = static_cast<uint16_t>(write_value_ * 10.0f + 0.5f);
   if (write_kind_ == WriteKind::HOT_WATER_TEMPERATURE)
     comfortzone_status.hot_water_setting = static_cast<uint16_t>(write_value_ * 10.0f + 0.5f);
 }
+
+#if HP_PROTOCOL == HP_PROTOCOL_1_7
+bool comfortzone_heatpump::stage_priority_170_(bool set_bits) {
+  // Replay the panel's masked writes; never overwrite the shared flags word.
+  // Clear bits 0..2 (FFF8), then set 1/2/3. A failed second step is partial,
+  // never automatically retried or presented as a confirmed priority.
+  byte reg[9] = {1,2,3,4,0x0b,8,static_cast<byte>(set_bits ? 0x80 : 0x40),0x0e,0};
+  W_CMD cmd; W_REPLY reply;
+  czcraft::craft_w_cmd(this, &cmd, reg, set_bits ? static_cast<uint16_t>(write_value_) : 0xfff8);
+  czcraft::craft_w_reply(this, &reply, reg, 0x41);
+  priority_set_phase_ = set_bits;
+  return push_settings(reinterpret_cast<byte *>(&cmd), sizeof(cmd),
+                       reinterpret_cast<byte *>(&reply), sizeof(reply), 5, true);
+}
+#endif

@@ -4,6 +4,7 @@
 #include "frequency_fixture.h"
 #include "status_fixture.h"
 #include "operating_test.h"
+#include "panel_controls_test.h"
 #ifdef TEST_ESPHOME_PROBE
 #include "../components/comfortzone/comfortzone_probe.h"
 #endif
@@ -11,6 +12,7 @@
 int main(int argc, char **argv) {
   test_zero_byte_idle();
   test_operating();
+  test_panel_controls();
 #ifdef TEST_ESPHOME_PROBE
   {
     const std::array<uint8_t,23> captured_read = {0x65,0x6f,0xde,2,0xd3,0x5e,0x41,0x44,0x44,0x52,

@@ -48,7 +48,7 @@ class comfortzone_heatpump
 
 	// Non-blocking writes: accepted is not acknowledged. Call process() and
 	// poll_write() from the main loop, then inspect write_result().
-	enum class WriteKind { ROOM_TEMPERATURE, HOT_WATER_TEMPERATURE, SENSOR_OFFSET, FIREPLACE, FAN_SPEED, EXTRA_HOT_WATER, HEATING_CURVE, HOUR, MINUTE };
+	enum class WriteKind { ROOM_TEMPERATURE, HOT_WATER_TEMPERATURE, SENSOR_OFFSET, FIREPLACE, FAN_SPEED, EXTRA_HOT_WATER, HEATING_CURVE, HOUR, MINUTE, HOT_WATER_PRIORITY };
 	enum class WriteResult { IDLE, WAITING_FOR_BUS, WAITING_FOR_REPLY, SUCCESS, FAILED };
 	bool begin_write(WriteKind kind, float value, uint16_t sensor = 0);
 	void poll_write();
@@ -133,6 +133,9 @@ class comfortzone_heatpump
 	COMFORTZONE_STATUS comfortzone_status;
 
 #if HP_PROTOCOL == HP_PROTOCOL_1_7
+    bool priority_fresh() const { return comfortzone_status.hot_water_priority_setting.has_value() && static_cast<uint32_t>(millis()-priority_read_time_) <= 15000; }
+    bool fireplace_fresh() const { return comfortzone_status.fireplace_mode_enabled.has_value() && static_cast<uint32_t>(millis()-fireplace_read_time_) <= 15000; }
+    bool extra_water_fresh() const { return comfortzone_status.extra_hot_water_setting.has_value() && static_cast<uint32_t>(millis()-extra_water_read_time_) <= 15000; }
 	uint32_t clock_read_sequence() const { return clock_read_sequence_; }
 	uint32_t clock_read_time() const { return clock_read_time_; }
 	// Ages must use the decoder's timer, not a caller's different tick epoch.
@@ -147,6 +150,9 @@ class comfortzone_heatpump
 
 #if HP_PROTOCOL == HP_PROTOCOL_1_7
 	ComfortzoneOperating170 operating_170_;
+    uint32_t priority_read_time_{0}, fireplace_read_time_{0}, extra_water_read_time_{0};
+    bool stage_priority_170_(bool set_bits);
+    bool priority_set_phase_{false};
 	uint32_t clock_read_sequence_{0}, clock_read_time_{0};
 #endif
 

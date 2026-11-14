@@ -225,3 +225,42 @@ unknown. No generic defrost or legionella flag has been asserted.
 Async writes expose whether UART transmission was attempted. A failed write
 with no transmission can be rescheduled by the caller. A partial transmission
 or missing ACK remains ambiguous and must not be retried automatically.
+
+## Panel controls verified 2026-11-14
+
+Source: comfortzone-panel-20261114-152136/data/capture.pcap. Panel observations,
+readbacks and commands are preserved in tests/v170_panel_controls.json.
+
+- HW priority: bank 00 word 000e low bits 0..1: 1 Low, 2 Normal, 3 High.
+  User confirmed normal/low/high/normal/low/normal. The panel clears with a
+  FFF8 masked write to 40:000e then sets 1/2/3 at 80:000e. The asynchronous
+  implementation reproduces both steps, waits for each ACK and never writes
+  the complete shared word. Failure after step one is a partial change; no
+  automatic retry or optimistic status publication. An intermediate zero is
+  unknown, not Low. A subsequent readback is authoritative.
+- Fireplace: bank 01 word 0013 bit 0400. Observed 0044 -> 0c44 -> 0044,
+  with set 0400 at 81:0013 and clear fbff at 41:0013. The other changed bit
+  (0800) is not assigned a meaning. Compressor power/frequency fell to zero;
+  this does not make the flag a generic compressor-stop or defrost indicator.
+- Extra hot water: bank 01 word 0017 bit 0001. Observed five-byte status
+  280c000010 -> 2b0c000010 -> 280c000010. Set 0001 at 81:0017; clear fffe
+  at 41:0017. Both ACK values were 0c in this session; previous successful
+  activation had 08. Match CRC/address/register/header, not a fixed status
+  byte, and publish enabled/requested state only from readback.
+- Freshness for each readback is 15 seconds, independently refreshed by a
+  complete two-byte word in a CRC-valid reply. Split/invalid frames cannot
+  refresh the state. No guessed mode is assigned to the changed upper bits.
+- Panel confirms HW extra setting 70 C and HW extra time 180 min. No separate
+  legionella scheduling menu found. The same boost prefix in the week capture
+  does not distinguish automatic legionella operation from manual boost.
+- CW heater allowed displays 1.1 C without parentheses. Semantics and address
+  remain unverified; it is not exposed as a new control.
+
+ESPHome adds Hot water priority (Low/Normal/High) and Fireplace mode active.
+Existing Extra hot water setting and Hot water priority setting now receive
+170 readbacks. Binary statuses expire to unknown; the priority text expires
+likewise. The select displays its last confirmed option when data expires
+(ESPHome select has no equivalent missing-state publication here); it is never
+updated optimistically by sending a command. The text sensor indicates freshness.
+These firmware changes are host-tested; new priority writes still need a live
+ESP32 test. Panel observations verify the wire commands, not our new firmware.
